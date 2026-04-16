@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	T "github.com/IBM/fp-go/v2/tuple"
 	"github.com/dictybase-docker/interpro-manager/internal/interpro"
 	"github.com/urfave/cli/v3"
 )
@@ -55,12 +56,18 @@ func main() {
 	}
 }
 
+func buildStartURL(taxonID string, pageSize int) string {
+	return fmt.Sprintf("%s%s/?page_size=%d", baseURL, taxonID, pageSize)
+}
+
+func buildConfig(cmd *cli.Command) interpro.ExtractConfig {
+	return T.MakeTuple3(
+		interpro.MakeHTTPClient(),
+		buildStartURL(cmd.String("taxon-id"), cmd.Int("page-size")),
+		cmd.String("output"),
+	)
+}
+
 func extractAction(_ context.Context, cmd *cli.Command) error {
-	taxonID := cmd.String("taxon-id")
-	output := cmd.String("output")
-	pageSize := cmd.Int("page-size")
-
-	startURL := fmt.Sprintf("%s%s/?page_size=%d", baseURL, taxonID, pageSize)
-
-	return interpro.ExtractAndWrite(startURL, output)
+	return interpro.ExtractAndWrite(buildConfig(cmd))
 }

@@ -1,52 +1,53 @@
-// Package interpro provides functions to extract data from InterPro and write
-// it to a TSV file.
 package interpro
 
 import (
-	"context"
 	"fmt"
+	"os"
 
-	EF "github.com/IBM/fp-go/v2/effect"
 	E "github.com/IBM/fp-go/v2/either"
+	F "github.com/IBM/fp-go/v2/function"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
+	T "github.com/IBM/fp-go/v2/tuple"
 )
 
-type ExtractConfig struct {
-	StartURL   string
-	OutputPath string
-}
-
-func liftToThunk[A any](ioe IOE.IOEither[error, A]) EF.Thunk[A] {
-	return func(_ context.Context) func() E.Either[error, A] {
-		return ioe
+func newRuntimeState(cfg ExtractConfig) func(*os.File) RuntimeState {
+	return func(handle *os.File) RuntimeState {
+		return T.MakeTuple4(
+			handle,
+			configClient(cfg),
+			configStartURL(cfg),
+			configOutputPath(cfg),
+		)
 	}
 }
 
-func ExtractEffect() EF.Effect[ExtractConfig, string] {
-	return EF.Chain(func(cfg ExtractConfig) EF.Effect[ExtractConfig, string] {
-		program := IOE.Chain(func(records []ProteinRecord) IOE.IOEither[error, string] {
-			return WriteTSV(cfg.OutputPath, records)
-		})(FetchAllPages(cfg.StartURL))
-
-		return EF.FromThunk[ExtractConfig](liftToThunk(program))
-	})(EF.Ask[ExtractConfig]())
+func wrapRunError(err error) error {
+	return fmt.Errorf("extract failed: %w", err)
 }
 
-func ExtractAndWrite(startURL, outputPath string) error {
-	program := EF.Provide[string](ExtractConfig{
-		StartURL:   startURL,
-		OutputPath: outputPath,
-	})(ExtractEffect())
+func reportSuccess(path string) error {
+	fmt.Printf("wrote %s\n", path)
+	return nil
+}
 
-	result := program(context.Background())()
+func ExtractAndWrite(cfg ExtractConfig) error {
+	return F.Pipe1(
+		runProgram(cfg),
+		E.Fold(wrapRunError, reportSuccess),
+	)
+}
 
-	return E.Fold(
-		func(err error) error {
-			return fmt.Errorf("extract failed: %w", err)
+func runProgram(cfg ExtractConfig) E.Either[error, string] {
+	return IOE.WithResource[string](
+		F.Pipe2(
+			openOutputFile(configOutputPath(cfg)),
+			IOE.Map[error](newRuntimeState(cfg)),
+			IOE.ChainFirst(func(state RuntimeState) IOE.IOEither[error, []byte] {
+				return writeHeader(runtimeHandle(state))
+			}),
+		),
+		func(state RuntimeState) IOE.IOEither[error, struct{}] {
+			return closeOutputFile(runtimeHandle(state))
 		},
-		func(path string) error {
-			fmt.Printf("wrote %s\n", path)
-			return nil
-		},
-	)(result)
+	)(runLoop)()
 }

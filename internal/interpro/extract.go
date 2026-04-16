@@ -6,6 +6,7 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	E "github.com/IBM/fp-go/v2/either"
 	F "github.com/IBM/fp-go/v2/function"
+	T "github.com/IBM/fp-go/v2/tuple"
 )
 
 func ExtractRecords(results []Result) []ProteinRecord {
@@ -28,17 +29,29 @@ func toProteinRecord(r Result) ProteinRecord {
 	}
 }
 
-func FormatTSV(records []ProteinRecord) string {
-	header := "accession\tname\tgene"
-	rows := A.Map(func(r ProteinRecord) string {
-		return strings.Join([]string{r.Accession, r.Name, r.Gene}, "\t")
-	})(records)
-
+func FormatTSVChunk(records []ProteinRecord) string {
 	return E.Fold(
-		func([]string) string { return header },
-		func(rs []string) string { return header + "\n" + strings.Join(rs, "\n") },
+		func([]ProteinRecord) string {
+			return ""
+		},
+		func(rows []ProteinRecord) string {
+			return strings.Join(
+				A.Map(func(r ProteinRecord) string {
+					return strings.Join([]string{r.Accession, r.Name, r.Gene}, "\t")
+				})(rows),
+				"\n",
+			) + "\n"
+		},
 	)(E.FromPredicate(
-		func(rows []string) bool { return len(rows) > 0 },
-		func(rows []string) []string { return rows },
-	)(rows))
+		func(rs []ProteinRecord) bool { return len(rs) > 0 },
+		func(rs []ProteinRecord) []ProteinRecord { return rs },
+	)(records))
+}
+
+func toPageData(resp APIResponse) PageData {
+	return T.MakeTuple3(
+		resp,
+		ExtractRecords(resp.Results),
+		nextURL(resp.Next),
+	)
 }

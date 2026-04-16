@@ -4,21 +4,36 @@ import (
 	"os"
 
 	E "github.com/IBM/fp-go/v2/either"
-	F "github.com/IBM/fp-go/v2/function"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	IOEF "github.com/IBM/fp-go/v2/ioeither/file"
 )
 
-const filePerm os.FileMode = 0o600
-
-func WriteTSV(path string, records []ProteinRecord) IOE.IOEither[error, string] {
-	return F.Pipe2(
-		[]byte(FormatTSV(records)),
-		IOEF.WriteFile(path, filePerm),
-		IOE.Map[error](func([]byte) string { return path }),
-	)
+func openOutputFile(path string) IOE.IOEither[error, *os.File] {
+	return IOEF.Create(path)
 }
 
-func WriteTSVFold(path string, records []ProteinRecord) E.Either[error, string] {
-	return WriteTSV(path, records)()
+func closeOutputFile(handle *os.File) IOE.IOEither[error, struct{}] {
+	return IOEF.Close[*os.File](handle)
+}
+
+func writeHeader(handle *os.File) IOE.IOEither[error, []byte] {
+	return IOE.TryCatchError(func() ([]byte, error) {
+		data := []byte("accession\tname\tgene\n")
+		_, err := handle.Write(data)
+		return data, err
+	})
+}
+
+func writeChunk(handle *os.File) func(string) IOE.IOEither[error, []byte] {
+	return func(chunk string) IOE.IOEither[error, []byte] {
+		return IOE.TryCatchError(func() ([]byte, error) {
+			data := []byte(chunk)
+			_, err := handle.Write(data)
+			return data, err
+		})
+	}
+}
+
+func readFile(path string) E.Either[error, []byte] {
+	return IOEF.ReadFile(path)()
 }
