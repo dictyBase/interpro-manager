@@ -37,15 +37,6 @@ func writeRuntimeHeader(handle *os.File) IOE.IOEither[error, *os.File] {
 	})
 }
 
-func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
-	return F.Pipe3(
-		cmd,
-		initialConfig,
-		runProgram,
-		E.Fold(wrapRunError, reportSuccess),
-	)
-}
-
 func initialConfig(cmd *cli.Command) ExtractConfig {
 	return T.MakeTuple3(
 		ioehttp.MakeClient(http.DefaultClient),
@@ -58,21 +49,32 @@ func initialConfig(cmd *cli.Command) ExtractConfig {
 	)
 }
 
+func onCreateFile(cfg ExtractConfig) IOE.IOEither[error, RuntimeState] {
+	return F.Pipe3(
+		cfg.F3,
+		IOEF.Create,
+		IOE.ChainFirst(writeRuntimeHeader),
+		IOE.Map[error](func(handle *os.File) RuntimeState {
+			return F.Pipe1(
+				cfg,
+				T.Push3[ioehttp.Client, string, string](handle),
+			)
+		}),
+	)
+}
+
+func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
+	return F.Pipe3(
+		cmd,
+		initialConfig,
+		runProgram,
+		E.Fold(wrapRunError, reportSuccess),
+	)
+}
+
 func runProgram(cfg ExtractConfig) E.Either[error, string] {
 	return IOE.WithResource[string](
-		F.Pipe3(
-			configOutputPath(cfg),
-			IOEF.Create,
-			IOE.ChainFirst(writeRuntimeHeader),
-			IOE.Map[error](func(handle *os.File) RuntimeState {
-				return F.Pipe1(
-					cfg,
-					T.Push3[ioehttp.Client, string, string](handle),
-				)
-			}),
-		),
-		func(state RuntimeState) IOE.IOEither[error, struct{}] {
-			return closeOutputFile(runtimeHandle(state))
-		},
+		onCreateFile(cfg),
+		F.Flow2(runtimeHandle, closeOutputFile),
 	)(runLoop)()
 }
