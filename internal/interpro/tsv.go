@@ -1,21 +1,22 @@
 package interpro
 
 import (
-	"fmt"
 	"os"
 
 	E "github.com/IBM/fp-go/v2/either"
+	F "github.com/IBM/fp-go/v2/function"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
+	IOEF "github.com/IBM/fp-go/v2/ioeither/file"
 )
 
+const filePerm os.FileMode = 0o600
+
 func WriteTSV(path string, records []ProteinRecord) IOE.IOEither[error, string] {
-	content := FormatTSV(records)
-	return IOE.TryCatchError(func() (string, error) {
-		if err := os.WriteFile(path, []byte(content), 0600); err != nil {
-			return "", fmt.Errorf("writing file %s: %w", path, err)
-		}
-		return path, nil
-	})
+	return F.Pipe2(
+		[]byte(FormatTSV(records)),
+		IOEF.WriteFile(path, filePerm),
+		IOE.Map[error](func([]byte) string { return path }),
+	)
 }
 
 func WriteTSVFold(path string, records []ProteinRecord) E.Either[error, string] {

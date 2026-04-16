@@ -7,40 +7,60 @@ import (
 	"net/http"
 
 	E "github.com/IBM/fp-go/v2/either"
+	F "github.com/IBM/fp-go/v2/function"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	O "github.com/IBM/fp-go/v2/option"
 )
 
-func fetchURL(url string) IOE.IOEither[error, []byte] {
-	return IOE.TryCatchError(func() ([]byte, error) {
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		if err != nil {
-			return nil, fmt.Errorf("http new request failed: %w", err)
-		}
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			return nil, fmt.Errorf("http get failed: %w", err)
-		}
-		defer resp.Body.Close()
+//nolint:bodyclose
+func makeRequest(url string) E.Either[error, *http.Response] {
+	return E.Chain(
+		func(req *http.Request) E.Either[error, *http.Response] {
+			return E.TryCatchError(http.DefaultClient.Do(req))
+		},
+	)(E.TryCatchError(http.NewRequest(http.MethodGet, url, nil)))
+}
 
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-		}
+//nolint:bodyclose
+func assertOK(resp *http.Response) E.Either[error, *http.Response] {
+	return E.FromPredicate(
+		func(r *http.Response) bool { return r.StatusCode == http.StatusOK },
+		func(r *http.Response) error {
+			return fmt.Errorf("unexpected status code: %d", r.StatusCode)
+		},
+	)(resp)
+}
 
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, fmt.Errorf("reading response body: %w", err)
-		}
-		return body, nil
+func readBody(body io.ReadCloser) IOE.IOEither[error, []byte] {
+	return IOE.WithResource[[]byte](
+		IOE.Of[error](body),
+		func(c io.ReadCloser) IOE.IOEither[error, struct{}] {
+			return IOE.TryCatchError(func() (struct{}, error) {
+				return struct{}{}, c.Close()
+			})
+		},
+	)(func(c io.ReadCloser) IOE.IOEither[error, []byte] {
+		return IOE.TryCatchError(func() ([]byte, error) {
+			return io.ReadAll(c)
+		})
 	})
+}
+
+//nolint:bodyclose
+func fetchURL(url string) IOE.IOEither[error, []byte] {
+	return F.Pipe3(
+		makeRequest(url),
+		E.Chain(assertOK),
+		IOE.FromEither[error, *http.Response],
+		IOE.Chain(func(resp *http.Response) IOE.IOEither[error, []byte] {
+			return readBody(resp.Body)
+		}),
+	)
 }
 
 func decodeResponse(data []byte) E.Either[error, APIResponse] {
 	var resp APIResponse
-	if err := json.Unmarshal(data, &resp); err != nil {
-		return E.Left[APIResponse, error](fmt.Errorf("json decode: %w", err))
-	}
-	return E.Right[error, APIResponse](resp)
+	return E.TryCatchError(resp, json.Unmarshal(data, &resp))
 }
 
 func fetchPage(url string) IOE.IOEither[error, APIResponse] {
@@ -50,10 +70,10 @@ func fetchPage(url string) IOE.IOEither[error, APIResponse] {
 }
 
 func nextOption(next *string) O.Option[string] {
-	if next == nil {
-		return O.None[string]()
-	}
-	return O.Some(*next)
+	return F.Pipe1(
+		O.FromNillable(next),
+		O.Map(func(p *string) string { return *p }),
+	)
 }
 
 func FetchAllPages(startURL string) IOE.IOEither[error, []ProteinRecord] {
