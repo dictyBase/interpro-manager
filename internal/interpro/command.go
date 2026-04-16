@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 
+	IOEF "github.com/IBM/fp-go/v2/ioeither/file"
+
 	E "github.com/IBM/fp-go/v2/either"
 	F "github.com/IBM/fp-go/v2/function"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
@@ -39,6 +41,14 @@ func reportSuccess(path string) error {
 	return nil
 }
 
+func writeRuntimeHeader(state RuntimeState) IOE.IOEither[error, []byte] {
+	return F.Pipe2(
+		state,
+		runtimeHandle,
+		writeHeader,
+	)
+}
+
 func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
 	return F.Pipe3(
 		cmd,
@@ -62,12 +72,11 @@ func initialConfig(cmd *cli.Command) T.Tuple3[ioehttp.Client, string, string] {
 
 func runProgram(cfg ExtractConfig) E.Either[error, string] {
 	return IOE.WithResource[string](
-		F.Pipe2(
-			openOutputFile(configOutputPath(cfg)),
+		F.Pipe3(
+			cfg.F3,
+			IOEF.Create,
 			IOE.Map[error](newRuntimeState(cfg)),
-			IOE.ChainFirst(func(state RuntimeState) IOE.IOEither[error, []byte] {
-				return writeHeader(runtimeHandle(state))
-			}),
+			IOE.ChainFirst(writeRuntimeHeader),
 		),
 		func(state RuntimeState) IOE.IOEither[error, struct{}] {
 			return closeOutputFile(runtimeHandle(state))
