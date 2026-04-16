@@ -1,0 +1,710 @@
+{
+    "count": 13188,
+    "next": "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/44689/?cursor=source%7Cs%7Cb0g0y9&page_size=20",
+    "previous": null,
+    "results": [
+        {
+            "metadata": {
+                "accession": "A0A0K2SR10",
+                "name": "Generative cell specific-1/HAP2 domain-containing protein",
+                "source_database": "unreviewed",
+                "length": 713,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "hapA",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A0K2SR14",
+                "name": "Cell fusion related protein",
+                "source_database": "unreviewed",
+                "length": 1747,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "mrhA",
+                "in_alphafold": false,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A0K2SR34",
+                "name": "Generative cell specific-1/HAP2 domain-containing protein",
+                "source_database": "unreviewed",
+                "length": 727,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "hapA",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A0K2SRB5",
+                "name": "Cell fusion related protein",
+                "source_database": "unreviewed",
+                "length": 1746,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "mrhA",
+                "in_alphafold": false,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A0K2SS13",
+                "name": "Generative cell specific-1/HAP2 domain-containing protein",
+                "source_database": "unreviewed",
+                "length": 745,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "hapA",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A0K2ZB59",
+                "name": "Formin-A",
+                "source_database": "unreviewed",
+                "length": 1217,
+                "source_organism": {
+                    "taxId": "366501",
+                    "scientificName": "Dictyostelium discoideum AX2",
+                    "fullName": "Dictyostelium discoideum AX2"
+                },
+                "gene": "forA",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "366501",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689",
+                        "366501"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A0U5KNR0",
+                "name": "Formin G",
+                "source_database": "unreviewed",
+                "length": 1074,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "forG",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A2C9SN78",
+                "name": "CTLH domain-containing protein",
+                "source_database": "unreviewed",
+                "length": 1040,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "DDB_G0288313",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A4D6TV46",
+                "name": "Cytochrome P450 family protein",
+                "source_database": "unreviewed",
+                "length": 491,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "CYP521A",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A8K1SM56",
+                "name": "C3H1-type domain-containing protein",
+                "source_database": "unreviewed",
+                "length": 467,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "ttpA",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A977IVX9",
+                "name": "Nucleoprotein TPR/MLP1-2 domain-containing protein",
+                "source_database": "unreviewed",
+                "length": 2052,
+                "source_organism": {
+                    "taxId": "352472",
+                    "scientificName": "Dictyostelium discoideum AX4",
+                    "fullName": "Dictyostelium discoideum AX4"
+                },
+                "gene": "DDB_G0288073",
+                "in_alphafold": false,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "352472",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689",
+                        "352472"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A0A977IX05",
+                "name": "C3HC-type domain-containing protein",
+                "source_database": "unreviewed",
+                "length": 635,
+                "source_organism": {
+                    "taxId": "352472",
+                    "scientificName": "Dictyostelium discoideum AX4",
+                    "fullName": "Dictyostelium discoideum AX4"
+                },
+                "gene": "DDB_G0284355",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "352472",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689",
+                        "352472"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A1XDC0",
+                "name": "Septin and tuftelin-interacting protein 1 homolog",
+                "source_database": "reviewed",
+                "length": 894,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "stip-1",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A9CLV7",
+                "name": "ATP synthase YMF19-like N-terminal domain-containing protein",
+                "source_database": "unreviewed",
+                "length": 105,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "atp8",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "A9CLV8",
+                "name": "ATPase subunit 4",
+                "source_database": "unreviewed",
+                "length": 137,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "atp4",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "B0G0Y4",
+                "name": "DNA 3'-5' helicase",
+                "source_database": "unreviewed",
+                "length": 1136,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "wrn",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "B0G0Y5",
+                "name": "Myb-like protein AA",
+                "source_database": "reviewed",
+                "length": 971,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "mybAA",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "B0G0Y7",
+                "name": "Uncharacterized protein",
+                "source_database": "unreviewed",
+                "length": 105,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "DDB_G0268646",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "B0G0Y8",
+                "name": "cGMP-specific 3',5'-cGMP phosphodiesterase 3",
+                "source_database": "reviewed",
+                "length": 466,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "pde3",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        },
+        {
+            "metadata": {
+                "accession": "B0G0Y9",
+                "name": "FNIP repeat-containing protein",
+                "source_database": "unreviewed",
+                "length": 900,
+                "source_organism": {
+                    "taxId": "44689",
+                    "scientificName": "Dictyostelium discoideum",
+                    "fullName": "Dictyostelium discoideum (Social amoeba)"
+                },
+                "gene": "DDB_G0271062",
+                "in_alphafold": true,
+                "in_bfvd": false
+            },
+            "taxa": [
+                {
+                    "accession": "44689",
+                    "lineage": [
+                        "1",
+                        "131567",
+                        "2759",
+                        "554915",
+                        "2605435",
+                        "142796",
+                        "33083",
+                        "2058949",
+                        "2058185",
+                        "5782",
+                        "44689"
+                    ],
+                    "source_database": "uniprot"
+                }
+            ]
+        }
+    ]
+}
