@@ -1,0 +1,66 @@
+version: "2"
+run:
+  allow-parallel-runners: true
+linters:
+  default: none
+  enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - copyloopvar
+    - cyclop
+    - decorder
+    - dogsled
+    - funlen
+    - funcorder
+    - goconst
+    - gocyclo
+    - gosec
+    - govet
+    - gocognit
+    - ineffassign
+    - importas
+    - inamedparam
+    - interfacebloat
+    - lll
+    - loggercheck
+    - misspell
+    - mnd
+    - nakedret
+    - nestif
+    - revive
+    - recvcheck
+    - staticcheck
+    - unconvert
+    - usestdlibvars
+    - unparam
+    - unused
+    - whitespace
+  settings:
+    funlen:
+      lines: 80
+      statements: 50
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+      - internal/baserow/
+      - internal/k8s/
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+    - golines
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
