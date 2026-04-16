@@ -21,17 +21,6 @@ import (
 
 const baseURL = "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/"
 
-func newRuntimeState(cfg ExtractConfig) func(*os.File) RuntimeState {
-	return func(handle *os.File) RuntimeState {
-		return T.MakeTuple4(
-			handle,
-			configClient(cfg),
-			configStartURL(cfg),
-			configOutputPath(cfg),
-		)
-	}
-}
-
 func wrapRunError(err error) error {
 	return fmt.Errorf("extract failed: %w", err)
 }
@@ -72,10 +61,15 @@ func initialConfig(cmd *cli.Command) ExtractConfig {
 func runProgram(cfg ExtractConfig) E.Either[error, string] {
 	return IOE.WithResource[string](
 		F.Pipe3(
-			cfg.F3,
+			configOutputPath(cfg),
 			IOEF.Create,
 			IOE.ChainFirst(writeRuntimeHeader),
-			IOE.Map[error](newRuntimeState(cfg)),
+			IOE.Map[error](func(handle *os.File) RuntimeState {
+				return F.Pipe1(
+					cfg,
+					T.Push3[ioehttp.Client, string, string](handle),
+				)
+			}),
 		),
 		func(state RuntimeState) IOE.IOEither[error, struct{}] {
 			return closeOutputFile(runtimeHandle(state))

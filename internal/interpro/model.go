@@ -50,7 +50,7 @@ type ProteinRecord struct {
 
 type ExtractConfig = T.Tuple3[ioehttp.Client, string, string]
 
-type RuntimeState = T.Tuple4[*os.File, ioehttp.Client, string, string]
+type RuntimeState = T.Tuple4[ioehttp.Client, string, string, *os.File]
 
 type PageData = T.Tuple3[APIResponse, []ProteinRecord, string]
 
@@ -58,14 +58,12 @@ type PageStep = T.Tuple4[error, string, []ProteinRecord, string]
 
 type LoopStep = T.Tuple3[error, string, string]
 
-func configClient(cfg ExtractConfig) ioehttp.Client { return cfg.F1 }
-func configStartURL(cfg ExtractConfig) string       { return cfg.F2 }
-func configOutputPath(cfg ExtractConfig) string     { return cfg.F3 }
+func configOutputPath(cfg ExtractConfig) string { return cfg.F3 }
 
-func runtimeHandle(state RuntimeState) *os.File       { return state.F1 }
-func runtimeClient(state RuntimeState) ioehttp.Client { return state.F2 }
-func runtimeURL(state RuntimeState) string            { return state.F3 }
-func runtimeOutputPath(state RuntimeState) string     { return state.F4 }
+func runtimeClient(state RuntimeState) ioehttp.Client { return state.F1 }
+func runtimeURL(state RuntimeState) string            { return state.F2 }
+func runtimeOutputPath(state RuntimeState) string     { return state.F3 }
+func runtimeHandle(state RuntimeState) *os.File       { return state.F4 }
 
 func pageRows(data PageData) []ProteinRecord { return data.F2 }
 func pageNext(data PageData) string          { return data.F3 }
