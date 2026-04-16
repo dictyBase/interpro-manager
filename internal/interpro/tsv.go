@@ -11,7 +11,7 @@ import (
 func WriteTSV(path string, records []ProteinRecord) IOE.IOEither[error, string] {
 	content := FormatTSV(records)
 	return IOE.TryCatchError(func() (string, error) {
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		if err := os.WriteFile(path, []byte(content), 0600); err != nil {
 			return "", fmt.Errorf("writing file %s: %w", path, err)
 		}
 		return path, nil

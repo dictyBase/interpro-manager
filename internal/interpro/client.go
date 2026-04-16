@@ -13,11 +13,15 @@ import (
 
 func fetchURL(url string) IOE.IOEither[error, []byte] {
 	return IOE.TryCatchError(func() ([]byte, error) {
-		resp, err := http.Get(url)
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			return nil, fmt.Errorf("http new request failed: %w", err)
+		}
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("http get failed: %w", err)
 		}
-		defer func() { _ = resp.Body.Close() }()
+		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
 			return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)

@@ -1,3 +1,5 @@
+// Package interpro provides functions to extract data from InterPro and write
+// it to a TSV file.
 package interpro
 
 import (
@@ -15,13 +17,13 @@ type ExtractConfig struct {
 }
 
 func liftToThunk[A any](ioe IOE.IOEither[error, A]) EF.Thunk[A] {
-	return func(ctx context.Context) func() E.Either[error, A] {
+	return func(_ context.Context) func() E.Either[error, A] {
 		return ioe
 	}
 }
 
 func ExtractEffect() EF.Effect[ExtractConfig, string] {
-	return EF.Chain[ExtractConfig](func(cfg ExtractConfig) EF.Effect[ExtractConfig, string] {
+	return EF.Chain(func(cfg ExtractConfig) EF.Effect[ExtractConfig, string] {
 		program := IOE.Chain(func(records []ProteinRecord) IOE.IOEither[error, string] {
 			return WriteTSV(cfg.OutputPath, records)
 		})(FetchAllPages(cfg.StartURL))
@@ -31,7 +33,7 @@ func ExtractEffect() EF.Effect[ExtractConfig, string] {
 }
 
 func ExtractAndWrite(startURL, outputPath string) error {
-	program := EF.Provide[string, ExtractConfig](ExtractConfig{
+	program := EF.Provide[string](ExtractConfig{
 		StartURL:   startURL,
 		OutputPath: outputPath,
 	})(ExtractEffect())

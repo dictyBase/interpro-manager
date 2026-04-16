@@ -13,6 +13,7 @@ const (
 	defaultTaxonID = "44689"
 	defaultOutput  = "interpro_proteins.tsv"
 	baseURL        = "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/"
+	defaultPageSize = 20
 )
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 					&cli.IntFlag{
 						Name:    "page-size",
 						Aliases: []string{"p"},
-						Value:   20,
+						Value:   defaultPageSize,
 						Usage:   "API page size",
 					},
 				},
@@ -54,7 +55,7 @@ func main() {
 	}
 }
 
-func extractAction(ctx context.Context, cmd *cli.Command) error {
+func extractAction(_ context.Context, cmd *cli.Command) error {
 	taxonID := cmd.String("taxon-id")
 	output := cmd.String("output")
 	pageSize := cmd.Int("page-size")
