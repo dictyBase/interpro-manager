@@ -41,12 +41,11 @@ func reportSuccess(path string) error {
 	return nil
 }
 
-func writeRuntimeHeader(state RuntimeState) IOE.IOEither[error, []byte] {
-	return F.Pipe2(
-		state,
-		runtimeHandle,
-		writeHeader,
-	)
+func writeRuntimeHeader(handle *os.File) IOE.IOEither[error, *os.File] {
+	return IOE.TryCatchError(func() (*os.File, error) {
+		_, err := handle.Write([]byte("aaccession\tname\tgene\n"))
+		return handle, err
+	})
 }
 
 func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
@@ -75,8 +74,8 @@ func runProgram(cfg ExtractConfig) E.Either[error, string] {
 		F.Pipe3(
 			cfg.F3,
 			IOEF.Create,
-			IOE.Map[error](newRuntimeState(cfg)),
 			IOE.ChainFirst(writeRuntimeHeader),
+			IOE.Map[error](newRuntimeState(cfg)),
 		),
 		func(state RuntimeState) IOE.IOEither[error, struct{}] {
 			return closeOutputFile(runtimeHandle(state))
