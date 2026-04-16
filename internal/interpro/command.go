@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	EF "github.com/IBM/fp-go/v2/effect"
 	E "github.com/IBM/fp-go/v2/either"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
-	EF "github.com/IBM/fp-go/v2/effect"
 )
 
 type ExtractConfig struct {
@@ -22,7 +22,7 @@ func liftToThunk[A any](ioe IOE.IOEither[error, A]) EF.Thunk[A] {
 
 func ExtractEffect() EF.Effect[ExtractConfig, string] {
 	return EF.Chain[ExtractConfig](func(cfg ExtractConfig) EF.Effect[ExtractConfig, string] {
-		program := IOE.Chain[error](func(records []ProteinRecord) IOE.IOEither[error, string] {
+		program := IOE.Chain(func(records []ProteinRecord) IOE.IOEither[error, string] {
 			return WriteTSV(cfg.OutputPath, records)
 		})(FetchAllPages(cfg.StartURL))
 

@@ -29,7 +29,11 @@ func TestDecodeResponse(t *testing.T) {
 		resp := unwrapEither(result)
 		assert.Equal(t, 13188, resp.Count)
 		assert.NotNil(t, resp.Next)
-		assert.Equal(t, "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/44689/?cursor=source%7Cs%7Cb0g0y9&page_size=20", *resp.Next)
+		assert.Equal(
+			t,
+			"https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/44689/?cursor=source%7Cs%7Cb0g0y9&page_size=20",
+			*resp.Next,
+		)
 		assert.Nil(t, resp.Previous)
 		assert.Equal(t, 20, len(resp.Results))
 	})

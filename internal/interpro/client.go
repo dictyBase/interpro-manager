@@ -34,13 +34,13 @@ func fetchURL(url string) IOE.IOEither[error, []byte] {
 func decodeResponse(data []byte) E.Either[error, APIResponse] {
 	var resp APIResponse
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return E.Left[APIResponse](fmt.Errorf("json decode: %w", err))
+		return E.Left[APIResponse, error](fmt.Errorf("json decode: %w", err))
 	}
-	return E.Right[error](resp)
+	return E.Right[error, APIResponse](resp)
 }
 
 func fetchPage(url string) IOE.IOEither[error, APIResponse] {
-	return IOE.Chain[error](func(data []byte) IOE.IOEither[error, APIResponse] {
+	return IOE.Chain(func(data []byte) IOE.IOEither[error, APIResponse] {
 		return IOE.FromEither[error](decodeResponse(data))
 	})(fetchURL(url))
 }
@@ -56,7 +56,7 @@ func FetchAllPages(startURL string) IOE.IOEither[error, []ProteinRecord] {
 	var loop func(string, []ProteinRecord) IOE.IOEither[error, []ProteinRecord]
 
 	loop = func(url string, acc []ProteinRecord) IOE.IOEither[error, []ProteinRecord] {
-		return IOE.Chain[error](func(resp APIResponse) IOE.IOEither[error, []ProteinRecord] {
+		return IOE.Chain(func(resp APIResponse) IOE.IOEither[error, []ProteinRecord] {
 			records := ExtractRecords(resp.Results)
 			all := append(acc, records...)
 

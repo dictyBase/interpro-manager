@@ -12,7 +12,7 @@ import (
 const (
 	defaultTaxonID = "44689"
 	defaultOutput  = "interpro_proteins.tsv"
-	baseURL       = "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/"
+	baseURL        = "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/"
 )
 
 func main() {
