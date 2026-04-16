@@ -43,7 +43,7 @@ func reportSuccess(path string) error {
 
 func writeRuntimeHeader(handle *os.File) IOE.IOEither[error, *os.File] {
 	return IOE.TryCatchError(func() (*os.File, error) {
-		_, err := handle.Write([]byte("aaccession\tname\tgene\n"))
+		_, err := handle.Write([]byte("accession\tname\tgene\n"))
 		return handle, err
 	})
 }
@@ -57,7 +57,7 @@ func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
 	)
 }
 
-func initialConfig(cmd *cli.Command) T.Tuple3[ioehttp.Client, string, string] {
+func initialConfig(cmd *cli.Command) ExtractConfig {
 	return T.MakeTuple3(
 		ioehttp.MakeClient(http.DefaultClient),
 		fmt.Sprintf(

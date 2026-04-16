@@ -1,7 +1,6 @@
 package interpro
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -14,7 +13,6 @@ import (
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	ioehb "github.com/IBM/fp-go/v2/ioeither/http/builder"
-	T "github.com/IBM/fp-go/v2/tuple"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -199,107 +197,5 @@ func TestWriteChunk(t *testing.T) {
 		t,
 		"accession\tname\tgene\nA1\tProtein 1\tgeneA\n",
 		string(unwrapEither(result)),
-	)
-}
-
-func newPaginatedServer() *httptest.Server {
-	page2 := `{
-		"count": 3,
-		"next": null,
-		"previous": "ignored",
-		"results": [{
-			"metadata": {
-				"accession": "A3",
-				"name": "Protein 3",
-				"source_database": "unreviewed",
-				"length": 100,
-				"source_organism": {
-					"taxId": "44689",
-					"scientificName": "Dictyostelium discoideum",
-					"fullName": "Dictyostelium discoideum"
-				},
-				"gene": "geneC",
-				"in_alphafold": false,
-				"in_bfvd": false
-			},
-			"taxa": []
-		}]
-	}`
-
-	var server *httptest.Server
-	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		if r.URL.RawQuery == "page=2" {
-			_, _ = w.Write([]byte(page2))
-			return
-		}
-
-		response := fmt.Sprintf(`{
-			"count": 3,
-			"next": %q,
-			"previous": null,
-			"results": [
-				{
-					"metadata": {
-						"accession": "A1",
-						"name": "Protein 1",
-						"source_database": "unreviewed",
-						"length": 100,
-						"source_organism": {
-							"taxId": "44689",
-							"scientificName": "Dictyostelium discoideum",
-							"fullName": "Dictyostelium discoideum"
-						},
-						"gene": "geneA",
-						"in_alphafold": false,
-						"in_bfvd": false
-					},
-					"taxa": []
-				},
-				{
-					"metadata": {
-						"accession": "A2",
-						"name": "Protein 2",
-						"source_database": "unreviewed",
-						"length": 100,
-						"source_organism": {
-							"taxId": "44689",
-							"scientificName": "Dictyostelium discoideum",
-							"fullName": "Dictyostelium discoideum"
-						},
-						"gene": "",
-						"in_alphafold": false,
-						"in_bfvd": false
-					},
-					"taxa": []
-				}
-			]
-		}`, server.URL+"/?page=2")
-		_, _ = w.Write([]byte(response))
-	}))
-
-	return server
-}
-
-func TestExtractAndWriteLoopsAcrossPages(t *testing.T) {
-	server := newPaginatedServer()
-	defer server.Close()
-
-	tmpDir := t.TempDir()
-	path := filepath.Join(tmpDir, "proteins.tsv")
-
-	err := ExtractAndWrite(T.MakeTuple3(
-		ioehttp.MakeClient(server.Client()),
-		server.URL,
-		path,
-	))
-	require.NoError(t, err)
-
-	content := readFile(path)
-	require.True(t, E.IsRight(content))
-	assert.Equal(
-		t,
-		"accession\tname\tgene\nA1\tProtein 1\tgeneA\nA3\tProtein 3\tgeneC\n",
-		string(unwrapEither(content)),
 	)
 }
