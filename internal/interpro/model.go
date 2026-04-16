@@ -58,8 +58,6 @@ type PageStep = T.Tuple4[error, string, []ProteinRecord, string]
 
 type LoopStep = T.Tuple3[error, string, string]
 
-func configOutputPath(cfg ExtractConfig) string { return cfg.F3 }
-
 func runtimeClient(state RuntimeState) ioehttp.Client { return state.F1 }
 func runtimeURL(state RuntimeState) string            { return state.F2 }
 func runtimeOutputPath(state RuntimeState) string     { return state.F3 }

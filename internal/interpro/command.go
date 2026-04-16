@@ -63,18 +63,19 @@ func onCreateFile(cfg ExtractConfig) IOE.IOEither[error, RuntimeState] {
 	)
 }
 
-func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
-	return F.Pipe3(
-		cmd,
-		initialConfig,
-		runProgram,
-		E.Fold(wrapRunError, reportSuccess),
-	)
-}
-
-func runProgram(cfg ExtractConfig) E.Either[error, string] {
+func runProgram(cfg ExtractConfig) IOE.IOEither[error, string] {
 	return IOE.WithResource[string](
 		onCreateFile(cfg),
 		F.Flow2(runtimeHandle, closeOutputFile),
-	)(runLoop)()
+	)(runLoop)
+}
+
+func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
+	return F.Pipe4(
+		cmd,
+		initialConfig,
+		runProgram,
+		toEither[error, string],
+		E.Fold(wrapRunError, reportSuccess),
+	)
 }
