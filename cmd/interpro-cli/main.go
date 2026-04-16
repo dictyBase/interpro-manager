@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	T "github.com/IBM/fp-go/v2/tuple"
 	"github.com/dictybase-docker/interpro-manager/internal/interpro"
 	"github.com/urfave/cli/v3"
 )
@@ -13,7 +12,6 @@ import (
 const (
 	defaultTaxonID  = "44689"
 	defaultOutput   = "interpro_proteins.tsv"
-	baseURL         = "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/"
 	defaultPageSize = 20
 )
 
@@ -45,7 +43,7 @@ func main() {
 						Usage:   "API page size",
 					},
 				},
-				Action: extractAction,
+				Action: interpro.ExtractAndWrite,
 			},
 		},
 	}
@@ -54,20 +52,4 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-}
-
-func buildStartURL(taxonID string, pageSize int) string {
-	return fmt.Sprintf("%s%s/?page_size=%d", baseURL, taxonID, pageSize)
-}
-
-func buildConfig(cmd *cli.Command) interpro.ExtractConfig {
-	return T.MakeTuple3(
-		interpro.MakeHTTPClient(),
-		buildStartURL(cmd.String("taxon-id"), cmd.Int("page-size")),
-		cmd.String("output"),
-	)
-}
-
-func extractAction(_ context.Context, cmd *cli.Command) error {
-	return interpro.ExtractAndWrite(buildConfig(cmd))
 }

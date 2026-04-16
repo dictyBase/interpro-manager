@@ -1,14 +1,23 @@
+// Package interpro provides the implementation of the `interpro extract`
+// command, which extracts InterProScan results from a given input file and
+// writes them to an output file in a specified format.
 package interpro
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	E "github.com/IBM/fp-go/v2/either"
 	F "github.com/IBM/fp-go/v2/function"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
+	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	T "github.com/IBM/fp-go/v2/tuple"
+	"github.com/urfave/cli/v3"
 )
+
+const baseURL = "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/"
 
 func newRuntimeState(cfg ExtractConfig) func(*os.File) RuntimeState {
 	return func(handle *os.File) RuntimeState {
@@ -30,10 +39,24 @@ func reportSuccess(path string) error {
 	return nil
 }
 
-func ExtractAndWrite(cfg ExtractConfig) error {
-	return F.Pipe1(
-		runProgram(cfg),
+func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
+	return F.Pipe3(
+		cmd,
+		initialConfig,
+		runProgram,
 		E.Fold(wrapRunError, reportSuccess),
+	)
+}
+
+func initialConfig(cmd *cli.Command) T.Tuple3[ioehttp.Client, string, string] {
+	return T.MakeTuple3(
+		ioehttp.MakeClient(http.DefaultClient),
+		fmt.Sprintf(
+			"%s%s/?page_size=%d",
+			baseURL, cmd.String("taxon-id"),
+			cmd.Int("page-size"),
+		),
+		cmd.String("output"),
 	)
 }
 
