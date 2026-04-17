@@ -69,10 +69,13 @@ func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
 		initialConfig,
 		onCreateFile,
 		func(acquire IOE.IOEither[error, RuntimeState]) IOE.IOEither[error, string] {
-			return IOE.WithResource[string](
-				acquire,
-				F.Flow2(runtimeHandle, closeOutputFile),
-			)(runLoop)
+			return F.Pipe1(
+				runLoop,
+				IOE.WithResource[string](
+					acquire,
+					F.Flow2(runtimeHandle, closeOutputFile),
+				),
+			)
 		},
 		toEither[error, string],
 		E.Fold(wrapRunError, reportSuccess),
