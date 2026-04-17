@@ -13,7 +13,7 @@ func openOutputFile(path string) IOE.IOEither[error, *os.File] {
 }
 
 func closeOutputFile(handle *os.File) IOE.IOEither[error, struct{}] {
-	return IOEF.Close[*os.File](handle)
+	return IOEF.Close(handle)
 }
 
 func writeHeader(handle *os.File) IOE.IOEither[error, []byte] {
