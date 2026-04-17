@@ -21,8 +21,8 @@ func main() {
 		Usage: "CLI for interacting with the InterPro protein database",
 		Commands: []*cli.Command{
 			{
-				Name:  "extract",
-				Usage: "Extract protein metadata for a taxonomy ID and save to TSV",
+				Name:  "download",
+				Usage: "Fetch InterPro protein records for a taxonomy ID and save to TSV",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "taxon-id",
@@ -43,7 +43,7 @@ func main() {
 						Usage:   "API page size",
 					},
 				},
-				Action: interpro.ExtractAndWrite,
+				Action: interpro.DownloadAndWrite,
 			},
 		},
 	}

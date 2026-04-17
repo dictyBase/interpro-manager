@@ -1,6 +1,6 @@
-// Package interpro provides the implementation of the `interpro extract`
-// command, which extracts InterProScan results from a given input file and
-// writes them to an output file in a specified format.
+// Package interpro provides the implementation of the `interpro download`
+// command, which fetches InterPro protein records for a given taxonomy ID
+// and writes them to an output file in TSV format.
 package interpro
 
 import (
@@ -21,8 +21,8 @@ import (
 
 const baseURL = "https://www.ebi.ac.uk/interpro/api/protein/UniProt/taxonomy/uniprot/"
 
-func wrapRunError(err error) error {
-	return fmt.Errorf("extract failed: %w", err)
+func wrapDownloadError(err error) error {
+	return fmt.Errorf("download failed: %w", err)
 }
 
 func reportSuccess(path string) error {
@@ -37,7 +37,7 @@ func writeRuntimeHeader(handle *os.File) IOE.IOEither[error, *os.File] {
 	})
 }
 
-func initialConfig(cmd *cli.Command) ExtractConfig {
+func initialDownloadConfig(cmd *cli.Command) ExtractConfig {
 	return T.MakeTuple3(
 		ioehttp.MakeClient(http.DefaultClient),
 		fmt.Sprintf(
@@ -63,10 +63,10 @@ func onCreateFile(cfg ExtractConfig) IOE.IOEither[error, RuntimeState] {
 	)
 }
 
-func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
+func DownloadAndWrite(_ context.Context, cmd *cli.Command) error {
 	return F.Pipe5(
 		cmd,
-		initialConfig,
+		initialDownloadConfig,
 		onCreateFile,
 		func(acquire IOE.IOEither[error, RuntimeState]) IOE.IOEither[error, string] {
 			return F.Pipe1(
@@ -78,6 +78,6 @@ func ExtractAndWrite(_ context.Context, cmd *cli.Command) error {
 			)
 		},
 		toEither[error, string],
-		E.Fold(wrapRunError, reportSuccess),
+		E.Fold(wrapDownloadError, reportSuccess),
 	)
 }
