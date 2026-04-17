@@ -6,7 +6,6 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	E "github.com/IBM/fp-go/v2/either"
 	F "github.com/IBM/fp-go/v2/function"
-	T "github.com/IBM/fp-go/v2/tuple"
 )
 
 func ExtractRecords(results []Result) []ProteinRecord {
@@ -46,12 +45,4 @@ func FormatTSVChunk(records []ProteinRecord) string {
 		func(rs []ProteinRecord) bool { return len(rs) > 0 },
 		func(rs []ProteinRecord) []ProteinRecord { return rs },
 	)(records))
-}
-
-func toPageData(resp APIResponse) PageData {
-	return T.MakeTuple3(
-		resp,
-		ExtractRecords(resp.Results),
-		nextURL(resp.Next),
-	)
 }

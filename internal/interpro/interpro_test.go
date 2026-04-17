@@ -13,6 +13,7 @@ import (
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	ioehb "github.com/IBM/fp-go/v2/ioeither/http/builder"
+	T "github.com/IBM/fp-go/v2/tuple"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -106,21 +107,21 @@ func TestFormatTSVChunk(t *testing.T) {
 	})
 }
 
-func TestToPageData(t *testing.T) {
-	nextURL := "https://example.com/next"
+func TestExtractRecordsFromResponse(t *testing.T) {
+	next := "https://example.com/next"
 	resp := APIResponse{
 		Count: 2,
-		Next:  &nextURL,
+		Next:  &next,
 		Results: []Result{
 			{Metadata: Metadata{Accession: "A1", Name: "Protein 1", Gene: "geneA"}},
 			{Metadata: Metadata{Accession: "A2", Name: "Protein 2", Gene: ""}},
 		},
 	}
 
-	data := toPageData(resp)
-	assert.Equal(t, 1, len(pageRows(data)))
-	assert.Equal(t, "https://example.com/next", pageNext(data))
-	assert.Equal(t, "A1", pageRows(data)[0].Accession)
+	records := ExtractRecords(resp.Results)
+	assert.Equal(t, 1, len(records))
+	assert.Equal(t, "A1", records[0].Accession)
+	assert.Equal(t, "https://example.com/next", nextURL(resp.Next))
 }
 
 func TestBuildPageRequest(t *testing.T) {
@@ -166,7 +167,7 @@ func TestFetchPageStep(t *testing.T) {
 	}))
 	defer server.Close()
 
-	step := fetchPageStep(ioehttp.MakeClient(server.Client()))(server.URL)
+	step := fetchPageStep(T.MakeTuple2(ioehttp.MakeClient(server.Client()), server.URL))
 
 	assert.NoError(t, stepError(step))
 	assert.Equal(t, "", stepNext(step))

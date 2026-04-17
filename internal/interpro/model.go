@@ -48,20 +48,17 @@ type ProteinRecord struct {
 	Gene      string
 }
 
+type FetchConfig = T.Tuple2[ioehttp.Client, string]
+
 type ExtractConfig = T.Tuple3[ioehttp.Client, string, string]
 
 type RuntimeState = T.Tuple4[ioehttp.Client, string, string, *os.File]
-
-type PageData = T.Tuple3[APIResponse, []ProteinRecord, string]
 
 type PageStep = T.Tuple4[error, string, []ProteinRecord, string]
 
 type LoopStep = T.Tuple3[error, string, string]
 
 func runtimeHandle(state RuntimeState) *os.File { return state.F4 }
-
-func pageRows(data PageData) []ProteinRecord { return data.F2 }
-func pageNext(data PageData) string          { return data.F3 }
 
 func stepError(step PageStep) error  { return step.F1 }
 func stepChunk(step PageStep) string { return step.F2 }

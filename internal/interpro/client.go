@@ -24,40 +24,35 @@ func nextURL(next *string) string {
 	)(O.Map(func(p *string) string { return *p })(O.FromNillable(next)))
 }
 
-func fetchPageStep(client ioehttp.Client) func(string) PageStep {
-	return func(url string) PageStep {
-		return F.Pipe5(
-			B.Default,
-			B.WithURL(url),
-			ioehb.Requester,
-			ioehttp.ReadJSON[APIResponse](client),
-			toEither,
-			E.Fold(
-				func(err error) PageStep {
-					return T.MakeTuple4[error, string, []ProteinRecord, string](
-						err,
-						"",
-						nil,
-						"",
-					)
-				},
-				func(resp APIResponse) PageStep {
-					return F.Pipe2(
-						resp,
-						toPageData,
-						func(data PageData) PageStep {
-							return T.MakeTuple4[error, string, []ProteinRecord, string](
-								nil,
-								FormatTSVChunk(pageRows(data)),
-								pageRows(data),
-								pageNext(data),
-							)
-						},
-					)
-				},
-			),
-		)
-	}
+func fetchPageStep(cfg FetchConfig) PageStep {
+	client := cfg.F1
+	url := cfg.F2
+	return F.Pipe5(
+		B.Default,
+		B.WithURL(url),
+		ioehb.Requester,
+		ioehttp.ReadJSON[APIResponse](client),
+		toEither,
+		E.Fold(
+			func(err error) PageStep {
+				return T.MakeTuple4[error, string, []ProteinRecord](
+					err,
+					"",
+					nil,
+					"",
+				)
+			},
+			func(resp APIResponse) PageStep {
+				records := ExtractRecords(resp.Results)
+				return T.MakeTuple4[error](
+					nil,
+					FormatTSVChunk(records),
+					records,
+					nextURL(resp.Next),
+				)
+			},
+		),
+	)
 }
 
 func MakeHTTPClient() ioehttp.Client {

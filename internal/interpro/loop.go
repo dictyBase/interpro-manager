@@ -41,8 +41,8 @@ func runLoop(state RuntimeState) IOE.IOEither[error, string] {
 
 		for S.IsNonEmpty(currentURL) {
 			last = F.Pipe4(
-				currentURL,
-				fetchPageStep(client),
+				T.MakeTuple2(client, currentURL),
+				fetchPageStep,
 				pageStepEither,
 				E.Chain(writeStep(handle)),
 				E.Fold(
