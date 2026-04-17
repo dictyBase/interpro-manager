@@ -1,8 +1,6 @@
 package interpro
 
 import (
-	"net/http"
-
 	E "github.com/IBM/fp-go/v2/either"
 	F "github.com/IBM/fp-go/v2/function"
 	B "github.com/IBM/fp-go/v2/http/builder"
@@ -18,43 +16,25 @@ func toEither[ERR, A any](ioe IOE.IOEither[ERR, A]) E.Either[ERR, A] {
 }
 
 func nextURL(next *string) string {
-	return O.Fold(
-		func() string { return "" },
-		func(url string) string { return url },
-	)(O.Map(func(p *string) string { return *p })(O.FromNillable(next)))
-}
-
-func fetchPageStep(cfg FetchConfig) PageStep {
-	client := cfg.F1
-	url := cfg.F2
-	return F.Pipe5(
-		B.Default,
-		B.WithURL(url),
-		ioehb.Requester,
-		ioehttp.ReadJSON[APIResponse](client),
-		toEither,
-		E.Fold(
-			func(err error) PageStep {
-				return T.MakeTuple4[error, string, []ProteinRecord](
-					err,
-					"",
-					nil,
-					"",
-				)
-			},
-			func(resp APIResponse) PageStep {
-				records := ExtractRecords(resp.Results)
-				return T.MakeTuple4[error](
-					nil,
-					FormatTSVChunk(records),
-					records,
-					nextURL(resp.Next),
-				)
-			},
-		),
+	return F.Pipe3(
+		next,
+		O.FromNillable[string],
+		O.Map(func(p *string) string { return *p }),
+		O.GetOrElse(F.Constant("")),
 	)
 }
 
-func MakeHTTPClient() ioehttp.Client {
-	return ioehttp.MakeClient(http.DefaultClient)
+func fetchPage(cfg FetchConfig) IOE.IOEither[error, PageStep] {
+	return F.Pipe4(
+		B.Default,
+		B.WithURL(cfg.F2),
+		ioehb.Requester,
+		ioehttp.ReadJSON[APIResponse](cfg.F1),
+		IOE.Map[error](func(resp APIResponse) PageStep {
+			return T.MakeTuple2(
+				FormatTSVChunk(resp.Results),
+				nextURL(resp.Next),
+			)
+		}),
+	)
 }

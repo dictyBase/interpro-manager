@@ -42,28 +42,14 @@ type APIResponse struct {
 	Results  []Result `json:"results"`
 }
 
-type ProteinRecord struct {
-	Accession string
-	Name      string
-	Gene      string
-}
-
 type FetchConfig = T.Tuple2[ioehttp.Client, string]
 
 type ExtractConfig = T.Tuple3[ioehttp.Client, string, string]
 
 type RuntimeState = T.Tuple4[ioehttp.Client, string, string, *os.File]
 
-type PageStep = T.Tuple4[error, string, []ProteinRecord, string]
+type PageStep = T.Tuple2[string, string]
 
-type LoopStep = T.Tuple3[error, string, string]
+type WriteConfig = T.Tuple2[*os.File, PageStep]
 
 func runtimeHandle(state RuntimeState) *os.File { return state.F4 }
-
-func stepError(step PageStep) error  { return step.F1 }
-func stepChunk(step PageStep) string { return step.F2 }
-func stepNext(step PageStep) string  { return step.F4 }
-
-func loopError(step LoopStep) error   { return step.F1 }
-func loopNext(step LoopStep) string   { return step.F2 }
-func loopOutput(step LoopStep) string { return step.F3 }

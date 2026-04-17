@@ -36,42 +36,16 @@ func TestNextURL(t *testing.T) {
 	})
 }
 
-func TestHasGene(t *testing.T) {
-	assert.True(t, hasGene(Result{Metadata: Metadata{Gene: "hapA"}}))
-	assert.False(t, hasGene(Result{Metadata: Metadata{Gene: ""}}))
-}
-
-func TestToProteinRecord(t *testing.T) {
-	r := Result{Metadata: Metadata{Accession: "A1", Name: "Protein", Gene: "geneA"}}
-	pr := toProteinRecord(r)
-	assert.Equal(t, "A1", pr.Accession)
-	assert.Equal(t, "Protein", pr.Name)
-	assert.Equal(t, "geneA", pr.Gene)
-}
-
-func TestExtractRecords(t *testing.T) {
-	t.Run("filters out entries without gene", func(t *testing.T) {
+func TestFormatTSVChunk(t *testing.T) {
+	t.Run("with results", func(t *testing.T) {
 		results := []Result{
 			{Metadata: Metadata{Accession: "A1", Name: "Protein 1", Gene: "geneA"}},
 			{Metadata: Metadata{Accession: "A2", Name: "Protein 2", Gene: ""}},
 			{Metadata: Metadata{Accession: "A3", Name: "Protein 3", Gene: "geneC"}},
 		}
 
-		records := ExtractRecords(results)
-		assert.Equal(t, 2, len(records))
-		assert.Equal(t, "A1", records[0].Accession)
-		assert.Equal(t, "geneA", records[0].Gene)
-		assert.Equal(t, "A3", records[1].Accession)
-		assert.Equal(t, "geneC", records[1].Gene)
-	})
-
-	t.Run("all entries have gene", func(t *testing.T) {
-		results := []Result{
-			{Metadata: Metadata{Accession: "A1", Name: "Protein 1", Gene: "geneA"}},
-		}
-
-		records := ExtractRecords(results)
-		assert.Equal(t, 1, len(records))
+		chunk := FormatTSVChunk(results)
+		assert.Equal(t, "A1\tProtein 1\tgeneA\nA3\tProtein 3\tgeneC\n", chunk)
 	})
 
 	t.Run("no entries have gene", func(t *testing.T) {
@@ -80,48 +54,14 @@ func TestExtractRecords(t *testing.T) {
 			{Metadata: Metadata{Accession: "A2", Name: "Protein 2", Gene: ""}},
 		}
 
-		records := ExtractRecords(results)
-		assert.Equal(t, 0, len(records))
+		chunk := FormatTSVChunk(results)
+		assert.Equal(t, "", chunk)
 	})
 
 	t.Run("empty results", func(t *testing.T) {
-		records := ExtractRecords([]Result{})
-		assert.Equal(t, 0, len(records))
-	})
-}
-
-func TestFormatTSVChunk(t *testing.T) {
-	t.Run("with records", func(t *testing.T) {
-		records := []ProteinRecord{
-			{Accession: "A0A0K2SR10", Name: "Protein A", Gene: "hapA"},
-			{Accession: "B0G0Y4", Name: "Protein B", Gene: "wrn"},
-		}
-
-		chunk := FormatTSVChunk(records)
-		assert.Equal(t, "A0A0K2SR10\tProtein A\thapA\nB0G0Y4\tProtein B\twrn\n", chunk)
-	})
-
-	t.Run("empty records", func(t *testing.T) {
-		chunk := FormatTSVChunk([]ProteinRecord{})
+		chunk := FormatTSVChunk([]Result{})
 		assert.Equal(t, "", chunk)
 	})
-}
-
-func TestExtractRecordsFromResponse(t *testing.T) {
-	next := "https://example.com/next"
-	resp := APIResponse{
-		Count: 2,
-		Next:  &next,
-		Results: []Result{
-			{Metadata: Metadata{Accession: "A1", Name: "Protein 1", Gene: "geneA"}},
-			{Metadata: Metadata{Accession: "A2", Name: "Protein 2", Gene: ""}},
-		},
-	}
-
-	records := ExtractRecords(resp.Results)
-	assert.Equal(t, 1, len(records))
-	assert.Equal(t, "A1", records[0].Accession)
-	assert.Equal(t, "https://example.com/next", nextURL(resp.Next))
 }
 
 func TestBuildPageRequest(t *testing.T) {
@@ -137,7 +77,7 @@ func TestBuildPageRequest(t *testing.T) {
 	assert.Equal(t, "https://example.org/page", req.URL.String())
 }
 
-func TestFetchPageStep(t *testing.T) {
+func TestFetchPage(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{
@@ -167,11 +107,12 @@ func TestFetchPageStep(t *testing.T) {
 	}))
 	defer server.Close()
 
-	step := fetchPageStep(T.MakeTuple2(ioehttp.MakeClient(server.Client()), server.URL))
+	result := fetchPage(T.MakeTuple2(ioehttp.MakeClient(server.Client()), server.URL))()
 
-	assert.NoError(t, stepError(step))
-	assert.Equal(t, "", stepNext(step))
-	assert.Contains(t, stepChunk(step), "A1\tProtein 1\tgeneA")
+	require.True(t, E.IsRight(result))
+	step := unwrapEither(result)
+	assert.Equal(t, "", step.F2)
+	assert.Contains(t, step.F1, "A1\tProtein 1\tgeneA")
 }
 
 func TestWriteChunk(t *testing.T) {
