@@ -50,6 +50,6 @@ type RuntimeState = T.Tuple4[ioehttp.Client, string, string, *os.File]
 
 type PageStep = T.Tuple2[string, string]
 
-type WriteConfig = T.Tuple2[*os.File, PageStep]
+type WriteConfig = T.Tuple3[*os.File, string, string]
 
 func runtimeHandle(state RuntimeState) *os.File { return state.F4 }

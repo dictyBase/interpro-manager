@@ -10,8 +10,8 @@ import (
 
 func writePage(cfg WriteConfig) IOE.IOEither[error, string] {
 	return IOE.TryCatchError(func() (string, error) {
-		_, err := cfg.F1.WriteString(cfg.F2.F1)
-		return cfg.F2.F2, err
+		_, err := cfg.F1.WriteString(cfg.F2)
+		return cfg.F3, err
 	})
 }
 
@@ -24,7 +24,7 @@ func runLoop(state RuntimeState) IOE.IOEither[error, string] {
 				T.MakeTuple2(state.F1, currentURL),
 				fetchPage,
 				IOE.Map[error](func(step PageStep) WriteConfig {
-					return T.MakeTuple2(state.F4, step)
+					return T.MakeTuple3(state.F4, step.F1, step.F2)
 				}),
 				IOE.Chain(writePage),
 				toEither[error, string],
