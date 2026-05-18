@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -15,52 +18,30 @@ var (
 
 func TestSingleFasta(t *testing.T) {
 	dir, err := os.Getwd()
-	if err != nil {
-		t.Error("Could not get current directory")
-	}
+	require.NoError(t, err, "Could not get current directory")
 
 	mfasta := filepath.Join(dir, "testdata", "single.fa")
 	reader := NewFastaReader(mfasta)
-	if !reader.HasEntry() {
-		t.Errorf("Did not get expected iteration %s", err)
-	}
+	require.True(t, reader.HasEntry(), "Did not get expected iteration")
 	entry := reader.NextEntry()
-	if entry == nil {
-		t.Fatal("Did not get expected entry")
-	}
+	require.NotNil(t, entry, "Did not get expected entry")
 
-	if !bytes.HasPrefix(entry.ID, []byte("tr|Q95Q25")) {
-		t.Error("Expected to match header")
-	}
-
-	if !seqRgxp.Match(entry.Sequence) {
-		t.Error("Expected to match sequence")
-	}
+	assert.True(t, bytes.HasPrefix(entry.ID, []byte("tr|Q95Q25")), "Expected to match header")
+	assert.True(t, seqRgxp.Match(entry.Sequence), "Expected to match sequence")
 }
 
 func TestMultiFasta(t *testing.T) {
 	dir, err := os.Getwd()
-	if err != nil {
-		t.Error("Could not get current directory")
-	}
+	require.NoError(t, err, "Could not get current directory")
 
 	mfasta := filepath.Join(dir, "testdata", "multi.fa")
 	reader := NewFastaReader(mfasta)
 	for i := 0; i <= 3; i++ {
-		if !reader.HasEntry() {
-			t.Error("Did not get expected iteration")
-		}
+		require.True(t, reader.HasEntry(), "Did not get expected iteration")
 		entry := reader.NextEntry()
-		if entry == nil {
-			t.Fatal("Did not get expected entry")
-		}
+		require.NotNil(t, entry, "Did not get expected entry")
 
-		if !headerRgxp.Match(entry.ID) {
-			t.Error("Expected to match header")
-		}
-
-		if !seqRgxp.Match(entry.Sequence) {
-			t.Error("Expected to match sequence")
-		}
+		assert.True(t, headerRgxp.Match(entry.ID), "Expected to match header")
+		assert.True(t, seqRgxp.Match(entry.Sequence), "Expected to match sequence")
 	}
 }
