@@ -18,7 +18,7 @@
 //		r := seqio.NewFastaReader(os.Args[1])
 //		for r.HasEntry() {
 //			fasta := r.NextEntry()
-//			fmt.Printf("id:%s\nSequence:%s\n", f.Id, f.Sequence)
+//			fmt.Printf("id:%s\nSequence:%s\n", f.ID, f.Sequence)
 //		}
 //	}
 package seqio
@@ -33,7 +33,7 @@ import (
 
 // A type for holding a single fasta record
 type Fasta struct {
-	Id       []byte // sequence id or header immediately followed by ">" symbol
+	ID       []byte // sequence id or header immediately followed by ">" symbol
 	Sequence []byte // The entire sequence
 }
 
@@ -45,6 +45,17 @@ type FastaReader struct {
 	sequence   []byte
 	exhausted  bool
 	fasta      *Fasta
+}
+
+// Create a new Fastareader
+func NewFastaReader(file string) *FastaReader {
+	reader, err := os.Open(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &FastaReader{
+		reader: bufio.NewReader(reader),
+	}
 }
 
 // Returns the next fasta entry
@@ -60,20 +71,19 @@ func (f *FastaReader) HasEntry() bool {
 			if err == io.EOF {
 				if !f.exhausted {
 					f.exhausted = true
-					f.fasta = &Fasta{Id: f.header, Sequence: f.sequence}
+					f.fasta = &Fasta{ID: f.header, Sequence: f.sequence}
 					return true
 				}
 				return false
-			} else {
-				log.Fatal(err)
 			}
+			log.Fatal(err)
 		}
 		if bytes.HasPrefix(line, []byte(">")) {
 			if !f.seenHeader {
 				f.header = line[1 : len(line)-1]
 				f.seenHeader = true
 			} else {
-				f.fasta = &Fasta{Id: f.header, Sequence: f.sequence}
+				f.fasta = &Fasta{ID: f.header, Sequence: f.sequence}
 				f.header = line[1 : len(line)-1]
 				f.sequence = []byte{}
 				return true
@@ -81,17 +91,5 @@ func (f *FastaReader) HasEntry() bool {
 		} else {
 			f.sequence = append(f.sequence, bytes.TrimSuffix(line, []byte("\n"))...)
 		}
-	}
-	return false
-}
-
-// Create a new Fastareader
-func NewFastaReader(file string) *FastaReader {
-	reader, err := os.Open(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return &FastaReader{
-		reader: bufio.NewReader(reader),
 	}
 }

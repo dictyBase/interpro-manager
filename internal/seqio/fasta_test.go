@@ -8,8 +8,10 @@ import (
 	"testing"
 )
 
-var headerRgxp = regexp.MustCompile(`^\w{1,4}`)
-var seqRgxp = regexp.MustCompile(`^[A-Z]+$`)
+var (
+	headerRgxp = regexp.MustCompile(`^\w{1,4}`)
+	seqRgxp    = regexp.MustCompile(`^[A-Z]+$`)
+)
 
 func TestSingleFasta(t *testing.T) {
 	dir, err := os.Getwd()
@@ -24,10 +26,10 @@ func TestSingleFasta(t *testing.T) {
 	}
 	entry := reader.NextEntry()
 	if entry == nil {
-		t.Error("Did not get expected entry")
+		t.Fatal("Did not get expected entry")
 	}
 
-	if !bytes.HasPrefix(entry.Id, []byte("tr|Q95Q25")) {
+	if !bytes.HasPrefix(entry.ID, []byte("tr|Q95Q25")) {
 		t.Error("Expected to match header")
 	}
 
@@ -50,10 +52,10 @@ func TestMultiFasta(t *testing.T) {
 		}
 		entry := reader.NextEntry()
 		if entry == nil {
-			t.Error("Did not get expected entry")
+			t.Fatal("Did not get expected entry")
 		}
 
-		if !headerRgxp.Match(entry.Id) {
+		if !headerRgxp.Match(entry.ID) {
 			t.Error("Expected to match header")
 		}
 
