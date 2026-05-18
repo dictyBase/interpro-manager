@@ -31,13 +31,15 @@ import (
 	"os"
 )
 
-// A type for holding a single fasta record
+// Fasta is a struct representing a fasta record, containing the sequence ID and
+// the sequence itself.
 type Fasta struct {
 	ID       []byte // sequence id or header immediately followed by ">" symbol
 	Sequence []byte // The entire sequence
 }
 
-// A data type for parsing one entry at a time
+// FastaReader is a type for reading fasta files. It maintains the state of the reader and the
+// current fasta record being processed.
 type FastaReader struct {
 	reader     *bufio.Reader // pointer to a buffered reader
 	seenHeader bool
@@ -47,7 +49,9 @@ type FastaReader struct {
 	fasta      *Fasta
 }
 
-// Create a new Fastareader
+// NewFastaReader initializes a new FastaReader for the given file path. It
+// opens the file and creates a buffered reader for efficient reading. If the
+// file cannot be opened, it logs a fatal error.
 func NewFastaReader(file string) *FastaReader {
 	reader, err := os.Open(file)
 	if err != nil {
@@ -58,12 +62,12 @@ func NewFastaReader(file string) *FastaReader {
 	}
 }
 
-// Returns the next fasta entry
+// NextEntry returns the next fasta entry as a Fasta struct.
 func (f *FastaReader) NextEntry() *Fasta {
 	return f.fasta
 }
 
-// Checks for next fasta entry. Should be called before reading the next entry
+// HasEntry checks if there is another fasta entry to read.
 func (f *FastaReader) HasEntry() bool {
 	for {
 		line, err := f.reader.ReadBytes('\n')
