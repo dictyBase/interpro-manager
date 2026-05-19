@@ -12,6 +12,7 @@ import (
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	IOEF "github.com/IBM/fp-go/v2/ioeither/file"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
+	Pred "github.com/IBM/fp-go/v2/predicate"
 	S "github.com/IBM/fp-go/v2/string"
 	T "github.com/IBM/fp-go/v2/tuple"
 	"github.com/urfave/cli/v3"
@@ -72,23 +73,42 @@ func scanSequences(r ScanRequest) IOE.IOEither[error, []string] {
 	)
 }
 
-func validateScanRequest(r ScanRequest) E.Either[error, ScanRequest] {
+var (
+	hasEmail = F.Pipe1(
+		S.IsNonEmpty,
+		Pred.ContraMap(func(s ScanRequest) string { return s.Email }),
+	)
+	hasFastaPath = F.Pipe1(
+		S.IsNonEmpty,
+		Pred.ContraMap(func(s ScanRequest) string { return s.FastaPath }),
+	)
+)
+
+func validateScanRequest(scanReq ScanRequest) E.Either[error, ScanRequest] {
 	return F.Pipe3(
-		E.Of[error](r),
-		E.Chain[error](E.FromPredicate(
-			F.Flow2(func(s ScanRequest) string { return s.Email }, S.IsNonEmpty),
-			ER.OnSome[ScanRequest]("email is required"),
-		)),
-		E.Chain[error](E.FromPredicate(
-			F.Flow2(func(s ScanRequest) string { return s.FastaPath }, S.IsNonEmpty),
+		E.Of[error](scanReq),
+		E.Chain(
+			E.FromPredicate(
+				hasEmail,
+				ER.OnSome[ScanRequest]("email is required"),
+			)),
+		E.Chain(E.FromPredicate(
+			hasFastaPath,
 			ER.OnSome[ScanRequest]("fasta path is required"),
 		)),
-		E.Chain[error](func(s ScanRequest) E.Either[error, ScanRequest] {
+		E.Chain(func(s ScanRequest) E.Either[error, ScanRequest] {
 			return F.Pipe2(
-				IOE.TryCatchError(func() (os.FileInfo, error) { return os.Stat(s.FastaPath) })(),
+				IOE.TryCatchError(
+					func() (os.FileInfo, error) {
+						return os.Stat(s.FastaPath)
+					})(),
 				E.MapTo[error, os.FileInfo](s),
 				E.MapLeft[ScanRequest](func(err error) error {
-					return fmt.Errorf("fasta file not found: %s: %w", s.FastaPath, err)
+					return fmt.Errorf(
+						"fasta file not found: %s: %w",
+						s.FastaPath,
+						err,
+					)
 				}),
 			)
 		}),
