@@ -4,16 +4,17 @@ import (
 	E "github.com/IBM/fp-go/v2/either"
 	F "github.com/IBM/fp-go/v2/function"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
+	T "github.com/IBM/fp-go/v2/tuple"
 
 	"github.com/dictybase-docker/interpro-manager/internal/seqio"
 )
 
-func streamFastaRecords(path string, args SubmitArgs) IOE.IOEither[error, []string] {
+func streamFastaRecords(args SubmitArgs) IOE.IOEither[error, []string] {
 	return IOE.TryCatchError(func() ([]string, error) {
 		var results []string
 		var loopErr error
 
-		for res := range seqio.ParseFASTA(path) {
+		for res := range seqio.ParseFASTA(T.Second(args).FastaPath) {
 			outPath := F.Pipe2(
 				res,
 				E.Chain(func(rec seqio.Fasta) E.Either[error, string] {

@@ -430,11 +430,11 @@ func TestStreamFastaRecordsEndToEnd(t *testing.T) {
 
 	dir, err := os.Getwd()
 	require.NoError(t, err)
-	fastaPath := filepath.Join(dir, "..", "seqio", "testdata", "multi.fa")
 
 	config := scanConfig(server.URL)
 	config.PollInterval = 10 * time.Millisecond
 	config.OutputDir = t.TempDir()
+	config.FastaPath = filepath.Join(dir, "..", "seqio", "testdata", "multi.fa")
 
 	args := T.MakeTuple2[ioehttp.Client, ScanRequest](
 		ioehttp.MakeClient(server.Client()),
@@ -443,7 +443,7 @@ func TestStreamFastaRecordsEndToEnd(t *testing.T) {
 
 	_ = ensureOutputDir(config.OutputDir)()
 
-	result := streamFastaRecords(fastaPath, args)()
+	result := streamFastaRecords(args)()
 	require.True(t, isRightScan(result))
 
 	paths := unwrapRightScan(result)

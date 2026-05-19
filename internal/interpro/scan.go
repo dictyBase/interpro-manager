@@ -56,20 +56,22 @@ func reportScanResults(paths []string) error {
 	return nil
 }
 
-func scanSequences(r ScanRequest) IOE.IOEither[error, []string] {
-	client := ioehttp.MakeClient(&http.Client{Timeout: r.Timeout})
-	args := T.MakeTuple2(client, r)
-
-	return F.Pipe1(
-		IOE.FromEither(validateScanRequest(r)),
-		IOE.Chain(func(_ ScanRequest) IOE.IOEither[error, []string] {
-			return F.Pipe1(
-				ensureOutputDir(r.OutputDir),
-				IOE.Chain(func(_ string) IOE.IOEither[error, []string] {
-					return streamFastaRecords(r.FastaPath, args)
-				}),
+func scanSequences(scanReq ScanRequest) IOE.IOEither[error, []string] {
+	return F.Pipe5(
+		scanReq,
+		validateScanRequest,
+		IOE.FromEither,
+		IOE.Map[error](func(r ScanRequest) SubmitArgs {
+			return T.MakeTuple2(
+				ioehttp.MakeClient(
+					&http.Client{Timeout: r.Timeout}),
+				r,
 			)
 		}),
+		IOE.ChainFirst(func(args SubmitArgs) IOE.IOEither[error, string] {
+			return IOEF.MkdirAll(T.Second(args).OutputDir, outputDirPerm)
+		}),
+		IOE.Chain(streamFastaRecords),
 	)
 }
 
