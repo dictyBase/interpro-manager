@@ -24,10 +24,22 @@ const (
 )
 
 func Scan(_ context.Context, cmd *cli.Command) error {
-	return F.Pipe4(
+	return F.Pipe8(
 		cmd,
 		extractScanRequest,
-		scanSequences,
+		validateScanRequest,
+		IOE.FromEither,
+		IOE.Map[error](func(r ScanRequest) SubmitArgs {
+			return T.MakeTuple2(
+				ioehttp.MakeClient(
+					&http.Client{Timeout: r.Timeout}),
+				r,
+			)
+		}),
+		IOE.ChainFirst(func(args SubmitArgs) IOE.IOEither[error, string] {
+			return IOEF.MkdirAll(T.Second(args).OutputDir, outputDirPerm)
+		}),
+		IOE.Chain(streamFastaRecords),
 		toEither[error, []string],
 		E.Fold(wrapScanError, reportScanResults),
 	)
@@ -54,25 +66,6 @@ func reportScanResults(paths []string) error {
 		fmt.Printf("wrote %s\n", p)
 	}
 	return nil
-}
-
-func scanSequences(scanReq ScanRequest) IOE.IOEither[error, []string] {
-	return F.Pipe5(
-		scanReq,
-		validateScanRequest,
-		IOE.FromEither,
-		IOE.Map[error](func(r ScanRequest) SubmitArgs {
-			return T.MakeTuple2(
-				ioehttp.MakeClient(
-					&http.Client{Timeout: r.Timeout}),
-				r,
-			)
-		}),
-		IOE.ChainFirst(func(args SubmitArgs) IOE.IOEither[error, string] {
-			return IOEF.MkdirAll(T.Second(args).OutputDir, outputDirPerm)
-		}),
-		IOE.Chain(streamFastaRecords),
-	)
 }
 
 var (
