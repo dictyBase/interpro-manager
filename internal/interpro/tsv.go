@@ -4,6 +4,7 @@ import (
 	"os"
 
 	E "github.com/IBM/fp-go/v2/either"
+	F "github.com/IBM/fp-go/v2/function"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	IOEF "github.com/IBM/fp-go/v2/ioeither/file"
 )
@@ -35,5 +36,9 @@ func writeChunk(handle *os.File) func(string) IOE.IOEither[error, []byte] {
 }
 
 func readFile(path string) E.Either[error, []byte] {
-	return IOEF.ReadFile(path)()
+	return F.Pipe2(
+		path,
+		IOEF.ReadFile,
+		toEither[error, []byte],
+	)
 }

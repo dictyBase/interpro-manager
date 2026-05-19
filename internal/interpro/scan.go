@@ -97,11 +97,10 @@ func validateScanRequest(scanReq ScanRequest) E.Either[error, ScanRequest] {
 			ER.OnSome[ScanRequest]("fasta path is required"),
 		)),
 		E.Chain(func(s ScanRequest) E.Either[error, ScanRequest] {
-			return F.Pipe2(
-				IOE.TryCatchError(
-					func() (os.FileInfo, error) {
-						return os.Stat(s.FastaPath)
-					})(),
+			return F.Pipe4(
+				s.FastaPath,
+				IOEF.Stat,
+				toEither[error, os.FileInfo],
 				E.MapTo[error, os.FileInfo](s),
 				E.MapLeft[ScanRequest](func(err error) error {
 					return fmt.Errorf(
