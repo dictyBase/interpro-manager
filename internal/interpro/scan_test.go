@@ -14,6 +14,7 @@ import (
 
 	E "github.com/IBM/fp-go/v2/either"
 	F "github.com/IBM/fp-go/v2/function"
+	IOE "github.com/IBM/fp-go/v2/ioeither"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	T "github.com/IBM/fp-go/v2/tuple"
 
@@ -400,7 +401,12 @@ func TestProcessOneFastaIntegration(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := processOneFasta(args)(rec)()
+	result := F.Pipe3(
+		submitOneRecord(args)(rec),
+		IOE.Chain(pollJob),
+		IOE.Chain(downloadAndSave),
+		toEither[error, string],
+	)
 	require.True(t, isRightScan(result))
 
 	outputPath := unwrapRightScan(result)

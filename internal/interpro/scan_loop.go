@@ -15,11 +15,13 @@ func streamFastaRecords(args SubmitArgs) IOE.IOEither[error, []string] {
 		var loopErr error
 
 		for res := range seqio.ParseFASTA(T.Second(args).FastaPath) {
-			outPath := F.Pipe2(
+			outPath := F.Pipe6(
 				res,
-				E.Chain(func(rec seqio.Fasta) E.Either[error, string] {
-					return toEither[error, string](processOneFasta(args)(rec))
-				}),
+				IOE.FromEither,
+				IOE.Chain(submitOneRecord(args)),
+				IOE.Chain(pollJob),
+				IOE.Chain(downloadAndSave),
+				toEither[error, string],
 				E.Fold(
 					func(err error) string { loopErr = err; return "" },
 					func(p string) string { results = append(results, p); return p },
