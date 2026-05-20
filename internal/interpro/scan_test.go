@@ -242,7 +242,18 @@ func TestSubmitOneRecord(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := submitOneRecord(args)(rec)()
+	result := F.Pipe2(
+		buildSubmitRequester(args.F2, rec),
+		ioehttp.ReadText(args.F1),
+		IOE.Map[error](func(jobID string) SubmittedJob {
+			return SubmittedJob{
+				JobID:  strings.TrimSpace(jobID),
+				SeqID:  extractSeqID(rec),
+				Client: args.F1,
+				Config: args.F2,
+			}
+		}),
+	)()
 	require.True(t, isRightScan(result))
 
 	job := unwrapRightScan(result)
@@ -264,7 +275,18 @@ func TestSubmitOneRecordServerError(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := submitOneRecord(args)(rec)()
+	result := F.Pipe2(
+		buildSubmitRequester(args.F2, rec),
+		ioehttp.ReadText(args.F1),
+		IOE.Map[error](func(jobID string) SubmittedJob {
+			return SubmittedJob{
+				JobID:  strings.TrimSpace(jobID),
+				SeqID:  extractSeqID(rec),
+				Client: args.F1,
+				Config: args.F2,
+			}
+		}),
+	)()
 	require.True(t, E.IsLeft(result))
 }
 
@@ -401,8 +423,17 @@ func TestProcessOneFastaIntegration(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := F.Pipe3(
-		submitOneRecord(args)(rec),
+	result := F.Pipe5(
+		buildSubmitRequester(args.F2, rec),
+		ioehttp.ReadText(args.F1),
+		IOE.Map[error](func(jobID string) SubmittedJob {
+			return SubmittedJob{
+				JobID:  strings.TrimSpace(jobID),
+				SeqID:  extractSeqID(rec),
+				Client: args.F1,
+				Config: args.F2,
+			}
+		}),
 		IOE.Chain(pollJob),
 		IOE.Chain(downloadAndSave),
 		toEither[error, string],
