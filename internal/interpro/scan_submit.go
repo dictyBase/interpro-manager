@@ -27,22 +27,24 @@ func buildSubmitRequester(
 		"sequence": {fmt.Sprintf(">%s\n%s", string(rec.ID), string(rec.Sequence))},
 	}.Encode()
 
-	requester := F.Pipe6(
-		B.Default,
-		B.WithURL(scanConfig.BaseURL+"/run"),
-		B.WithMethod("POST"),
-		B.WithHeader("Content-Type")("application/x-www-form-urlencoded"),
-		B.WithHeader("Accept")("text/plain"),
-		B.WithBytes([]byte(formData)),
-		ioehb.Requester,
+	return F.Pipe2(
+		F.Pipe6(
+			B.Default,
+			B.WithURL(scanConfig.BaseURL+"/run"),
+			B.WithMethod("POST"),
+			B.WithHeader("Content-Type")("application/x-www-form-urlencoded"),
+			B.WithHeader("Accept")("text/plain"),
+			B.WithBytes([]byte(formData)),
+			ioehb.Requester,
+		),
+		ioehttp.ReadText(client),
+		IOE.Map[error](func(jobID string) SubmittedJob {
+			return SubmittedJob{
+				JobID:  strings.TrimSpace(jobID),
+				SeqID:  extractSeqID(rec),
+				Client: client,
+				Config: scanConfig,
+			}
+		}),
 	)
-
-	return IOE.Map[error](func(jobID string) SubmittedJob {
-		return SubmittedJob{
-			JobID:  strings.TrimSpace(jobID),
-			SeqID:  extractSeqID(rec),
-			Client: client,
-			Config: scanConfig,
-		}
-	})(ioehttp.ReadText(client)(requester))
 }
