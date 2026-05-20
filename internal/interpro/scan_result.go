@@ -11,6 +11,8 @@ import (
 	IOEF "github.com/IBM/fp-go/v2/ioeither/file"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	ioehb "github.com/IBM/fp-go/v2/ioeither/http/builder"
+	M "github.com/IBM/fp-go/v2/monoid"
+	STR "github.com/IBM/fp-go/v2/string"
 )
 
 // downloadAndSave: CompletedJob → IOEither[error, string]
@@ -25,7 +27,15 @@ func downloadAndSave(job CompletedJob) IOE.IOEither[error, string] {
 func downloadJSONResult(job CompletedJob) IOE.IOEither[error, string] {
 	return F.Pipe4(
 		B.Default,
-		B.WithURL(fmt.Sprintf("%s/result/%s/json", job.Config.BaseURL, job.JobID)),
+		F.Pipe1(
+			M.ConcatAll(STR.Monoid)([]string{
+				job.Config.BaseURL,
+				"/result/",
+				job.JobID,
+				"/json",
+			}),
+			B.WithURL,
+		),
 		B.WithHeader("Accept")("application/json"),
 		ioehb.Requester,
 		ioehttp.ReadText(job.Client),

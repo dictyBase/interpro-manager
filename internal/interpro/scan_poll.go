@@ -13,6 +13,8 @@ import (
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	ioehb "github.com/IBM/fp-go/v2/ioeither/http/builder"
+	M "github.com/IBM/fp-go/v2/monoid"
+	STR "github.com/IBM/fp-go/v2/string"
 )
 
 // pollJob: SubmittedJob → IOEither[error, CompletedJob]
@@ -63,7 +65,15 @@ func pollJob(job SubmittedJob) IOE.IOEither[error, CompletedJob] {
 func getJobStatus(client ioehttp.Client, baseURL string, jobID string) IOE.IOEither[error, string] {
 	return F.Pipe4(
 		B.Default,
-		B.WithURL(baseURL+"/status/"+url.PathEscape(jobID)),
+		F.Pipe1(
+			M.ConcatAll(STR.Monoid)(
+				[]string{
+					baseURL,
+					"/status/",
+					url.PathEscape(jobID),
+				}),
+			B.WithURL,
+		),
 		B.WithHeader("Accept")("text/plain"),
 		ioehb.Requester,
 		ioehttp.ReadText(client),

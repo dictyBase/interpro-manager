@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	E "github.com/IBM/fp-go/v2/either"
 	ER "github.com/IBM/fp-go/v2/errors"
@@ -12,10 +13,21 @@ import (
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	IOEF "github.com/IBM/fp-go/v2/ioeither/file"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
+	M "github.com/IBM/fp-go/v2/monoid"
 	Pred "github.com/IBM/fp-go/v2/predicate"
 	S "github.com/IBM/fp-go/v2/string"
 	T "github.com/IBM/fp-go/v2/tuple"
 	"github.com/urfave/cli/v3"
+)
+
+var stringMonoid = M.MakeMonoid(
+	func(a, b string) string {
+		var builder strings.Builder
+		builder.WriteString(a)
+		builder.WriteString(b)
+		return builder.String()
+	},
+	"",
 )
 
 const (

@@ -10,6 +10,8 @@ import (
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	ioehb "github.com/IBM/fp-go/v2/ioeither/http/builder"
+	M "github.com/IBM/fp-go/v2/monoid"
+	STR "github.com/IBM/fp-go/v2/string"
 )
 
 func buildSubmitRequester(
@@ -30,7 +32,10 @@ func buildSubmitRequester(
 	return F.Pipe2(
 		F.Pipe6(
 			B.Default,
-			B.WithURL(scanConfig.BaseURL+"/run"),
+			F.Pipe1(
+				M.ConcatAll(STR.Monoid)([]string{scanConfig.BaseURL, "/", "run"}),
+				B.WithURL,
+			),
 			B.WithMethod("POST"),
 			B.WithHeader("Content-Type")("application/x-www-form-urlencoded"),
 			B.WithHeader("Accept")("text/plain"),
