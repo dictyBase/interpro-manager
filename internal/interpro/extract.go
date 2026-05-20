@@ -1,10 +1,14 @@
 package interpro
 
 import (
+	"bytes"
+
 	A "github.com/IBM/fp-go/v2/array"
 	F "github.com/IBM/fp-go/v2/function"
 	O "github.com/IBM/fp-go/v2/option"
 	S "github.com/IBM/fp-go/v2/string"
+
+	"github.com/dictybase-docker/interpro-manager/internal/seqio"
 )
 
 var hasGene = func(r Result) bool {
@@ -32,4 +36,11 @@ func FormatTSVChunk(results []Result) string {
 		O.Map(S.Append("\n")),
 		O.GetOrElse(F.Constant("")),
 	)
+}
+
+func extractSeqID(rec seqio.Fasta) string {
+	if i := bytes.IndexAny(rec.ID, " \t"); i >= 0 {
+		return string(rec.ID[:i])
+	}
+	return string(rec.ID)
 }

@@ -120,10 +120,22 @@ func TestValidateScanRequest(t *testing.T) {
 }
 
 func TestBuildSubmitRequester(t *testing.T) {
+	var capturedReq *http.Request
+	var capturedBody []byte
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		capturedReq = r
+		capturedBody = body
+		w.Header().Set("Content-Type", "text/plain")
+		_, _ = io.WriteString(w, "JOB-ABC-123")
+	}))
+	defer server.Close()
+
 	config := ScanRequest{
 		Email:   "tester@example.com",
 		SeqType: "p",
-		BaseURL: "http://test.local",
+		BaseURL: server.URL,
 	}
 
 	rec := seqio.Fasta{
@@ -131,22 +143,20 @@ func TestBuildSubmitRequester(t *testing.T) {
 		Sequence: []byte("MGSTESTSEQUENCE"),
 	}
 
-	reqEither := buildSubmitRequester(config, rec)()
-	require.True(t, isRightScan(reqEither))
-	req := unwrapRightScan(reqEither)
+	args := T.MakeTuple2[ioehttp.Client, ScanRequest](
+		ioehttp.MakeClient(server.Client()),
+		config,
+	)
 
-	assert.Equal(t, "POST", req.Method)
-	assert.Contains(t, req.URL.String(), "/run")
-	assert.Contains(t, req.URL.String(), "test.local")
+	result := buildSubmitRequester(T.MakeTuple2(args, rec))()
+	require.True(t, isRightScan(result))
 
-	assert.Equal(t, "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
-	assert.Equal(t, "text/plain", req.Header.Get("Accept"))
+	assert.Equal(t, "POST", capturedReq.Method)
+	assert.Equal(t, "/run", capturedReq.URL.Path)
+	assert.Equal(t, "application/x-www-form-urlencoded", capturedReq.Header.Get("Content-Type"))
+	assert.Equal(t, "text/plain", capturedReq.Header.Get("Accept"))
 
-	body, err := io.ReadAll(req.Body)
-	require.NoError(t, err)
-	req.Body.Close()
-	bodyStr := string(body)
-
+	bodyStr := string(capturedBody)
 	assert.Contains(t, bodyStr, "email=tester%40example.com")
 	assert.Contains(t, bodyStr, "stype=p")
 	assert.Contains(t, bodyStr, "goterms=true")
@@ -191,10 +201,20 @@ func TestExtractSeqID(t *testing.T) {
 }
 
 func TestBuildSubmitRequesterBody(t *testing.T) {
+	var capturedBody []byte
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		capturedBody = body
+		w.Header().Set("Content-Type", "text/plain")
+		_, _ = io.WriteString(w, "JOB-BODY-TEST")
+	}))
+	defer server.Close()
+
 	config := ScanRequest{
 		Email:   "test@ebi.ac.uk",
 		SeqType: "p",
-		BaseURL: "http://test.local",
+		BaseURL: server.URL,
 	}
 
 	rec := seqio.Fasta{
@@ -202,15 +222,15 @@ func TestBuildSubmitRequesterBody(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	reqEither := buildSubmitRequester(config, rec)()
-	require.True(t, isRightScan(reqEither))
-	req := unwrapRightScan(reqEither)
+	args := T.MakeTuple2[ioehttp.Client, ScanRequest](
+		ioehttp.MakeClient(server.Client()),
+		config,
+	)
 
-	body, err := io.ReadAll(req.Body)
-	require.NoError(t, err)
-	req.Body.Close()
-	bodyStr := string(body)
+	result := buildSubmitRequester(T.MakeTuple2(args, rec))()
+	require.True(t, isRightScan(result))
 
+	bodyStr := string(capturedBody)
 	assert.Contains(t, bodyStr, fmt.Sprintf("email=%s", "test%40ebi.ac.uk"))
 	assert.Contains(t, bodyStr, "stype=p")
 	assert.Contains(t, bodyStr, "sequence=%3Etest_seq%0AMKFLVLALL")
@@ -242,18 +262,7 @@ func TestSubmitOneRecord(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := F.Pipe2(
-		buildSubmitRequester(args.F2, rec),
-		ioehttp.ReadText(args.F1),
-		IOE.Map[error](func(jobID string) SubmittedJob {
-			return SubmittedJob{
-				JobID:  strings.TrimSpace(jobID),
-				SeqID:  extractSeqID(rec),
-				Client: args.F1,
-				Config: args.F2,
-			}
-		}),
-	)()
+	result := buildSubmitRequester(T.MakeTuple2(args, rec))()
 	require.True(t, isRightScan(result))
 
 	job := unwrapRightScan(result)
@@ -275,18 +284,7 @@ func TestSubmitOneRecordServerError(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := F.Pipe2(
-		buildSubmitRequester(args.F2, rec),
-		ioehttp.ReadText(args.F1),
-		IOE.Map[error](func(jobID string) SubmittedJob {
-			return SubmittedJob{
-				JobID:  strings.TrimSpace(jobID),
-				SeqID:  extractSeqID(rec),
-				Client: args.F1,
-				Config: args.F2,
-			}
-		}),
-	)()
+	result := buildSubmitRequester(T.MakeTuple2(args, rec))()
 	require.True(t, E.IsLeft(result))
 }
 
@@ -423,17 +421,8 @@ func TestProcessOneFastaIntegration(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := F.Pipe5(
-		buildSubmitRequester(args.F2, rec),
-		ioehttp.ReadText(args.F1),
-		IOE.Map[error](func(jobID string) SubmittedJob {
-			return SubmittedJob{
-				JobID:  strings.TrimSpace(jobID),
-				SeqID:  extractSeqID(rec),
-				Client: args.F1,
-				Config: args.F2,
-			}
-		}),
+	result := F.Pipe3(
+		buildSubmitRequester(T.MakeTuple2(args, rec)),
 		IOE.Chain(pollJob),
 		IOE.Chain(downloadAndSave),
 		toEither[error, string],
