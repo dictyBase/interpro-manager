@@ -10,18 +10,14 @@ import (
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	ioehb "github.com/IBM/fp-go/v2/ioeither/http/builder"
-	T "github.com/IBM/fp-go/v2/tuple"
-
-	"github.com/dictybase-docker/interpro-manager/internal/seqio"
 )
 
 func buildSubmitRequester(
-	input T.Tuple2[SubmitArgs, seqio.Fasta],
+	input SubmitInput,
 ) IOE.IOEither[error, SubmittedJob] {
-	args := input.F1
-	rec := input.F2
-	client := args.F1
-	scanConfig := args.F2
+	client := input.F1
+	scanConfig := input.F2
+	rec := input.F3
 
 	formData := url.Values{
 		"email":    {scanConfig.Email},

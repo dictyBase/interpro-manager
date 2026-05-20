@@ -148,7 +148,7 @@ func TestBuildSubmitRequester(t *testing.T) {
 		config,
 	)
 
-	result := buildSubmitRequester(T.MakeTuple2(args, rec))()
+	result := buildSubmitRequester(T.MakeTuple3(args.F1, args.F2, rec))()
 	require.True(t, isRightScan(result))
 
 	assert.Equal(t, "POST", capturedReq.Method)
@@ -227,7 +227,7 @@ func TestBuildSubmitRequesterBody(t *testing.T) {
 		config,
 	)
 
-	result := buildSubmitRequester(T.MakeTuple2(args, rec))()
+	result := buildSubmitRequester(T.MakeTuple3(args.F1, args.F2, rec))()
 	require.True(t, isRightScan(result))
 
 	bodyStr := string(capturedBody)
@@ -262,7 +262,7 @@ func TestSubmitOneRecord(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := buildSubmitRequester(T.MakeTuple2(args, rec))()
+	result := buildSubmitRequester(T.MakeTuple3(args.F1, args.F2, rec))()
 	require.True(t, isRightScan(result))
 
 	job := unwrapRightScan(result)
@@ -284,7 +284,7 @@ func TestSubmitOneRecordServerError(t *testing.T) {
 		Sequence: []byte("MKFLVLALL"),
 	}
 
-	result := buildSubmitRequester(T.MakeTuple2(args, rec))()
+	result := buildSubmitRequester(T.MakeTuple3(args.F1, args.F2, rec))()
 	require.True(t, E.IsLeft(result))
 }
 
@@ -422,7 +422,7 @@ func TestProcessOneFastaIntegration(t *testing.T) {
 	}
 
 	result := F.Pipe3(
-		buildSubmitRequester(T.MakeTuple2(args, rec)),
+		buildSubmitRequester(T.MakeTuple3(args.F1, args.F2, rec)),
 		IOE.Chain(pollJob),
 		IOE.Chain(downloadAndSave),
 		toEither[error, string],

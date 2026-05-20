@@ -5,6 +5,8 @@ import (
 
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	T "github.com/IBM/fp-go/v2/tuple"
+
+	"github.com/dictybase-docker/interpro-manager/internal/seqio"
 )
 
 // ScanRequest carries the user-provided inputs extracted from CLI flags.
@@ -37,3 +39,6 @@ type CompletedJob struct {
 // SubmitArgs bundles the shared HTTP client and scan config.
 // Uses project-wide T.Tuple2 convention for arg bundles.
 type SubmitArgs = T.Tuple2[ioehttp.Client, ScanRequest]
+
+// SubmitInput bundles client, config, and fasta record for submission.
+type SubmitInput = T.Tuple3[ioehttp.Client, ScanRequest, seqio.Fasta]
