@@ -173,7 +173,9 @@ func TestSaveResult(t *testing.T) {
 		Config: ScanRequest{OutputDir: tmpDir},
 	}
 
-	result := saveResult(job)(`{"results": [{"accession": "IPR000001"}]}`)()
+	result := saveResult(
+		T.MakeTuple2(`{"results": [{"accession": "IPR000001"}]}`, job),
+	)()
 	require.True(t, isRightScan(result))
 
 	outputPath := unwrapRightScan(result)
