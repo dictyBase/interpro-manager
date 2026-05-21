@@ -295,9 +295,13 @@ func TestGetJobStatus(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := ioehttp.MakeClient(server.Client())
+	job := SubmittedJob{
+		JobID:  "JOB-123",
+		Client: ioehttp.MakeClient(server.Client()),
+		Config: scanConfig(server.URL),
+	}
 
-	result := getJobStatus(client, server.URL, "JOB-123")()
+	result := getJobStatus(job)()
 	require.True(t, isRightScan(result))
 	assert.Equal(t, "RUNNING", unwrapRightScan(result))
 }
