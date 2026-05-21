@@ -20,8 +20,12 @@ import (
 
 // downloadAndSave: CompletedJob → IOEither[error, string]
 func downloadAndSave(job CompletedJob) IOE.IOEither[error, string] {
-	return F.Pipe2(
-		downloadJSONResult(job),
+	return F.Pipe6(
+		B.Default,
+		F.Pipe2(job, resultURL, B.WithURL),
+		B.WithHeader("Accept")("application/json"),
+		ioehb.Requester,
+		ioehttp.ReadText(job.Client),
 		IOE.Map[error](func(rawJSON string) T.Tuple3[string, CompletedJob, string] {
 			output := F.Pipe1(
 				job.Config.OutputDir,
@@ -34,17 +38,6 @@ func downloadAndSave(job CompletedJob) IOE.IOEither[error, string] {
 			return T.MakeTuple3(rawJSON, job, output)
 		}),
 		IOE.Chain(saveResult),
-	)
-}
-
-// downloadJSONResult fetches the JSON result body for a completed job.
-func downloadJSONResult(job CompletedJob) IOE.IOEither[error, string] {
-	return F.Pipe4(
-		B.Default,
-		F.Pipe2(job, resultURL, B.WithURL),
-		B.WithHeader("Accept")("application/json"),
-		ioehb.Requester,
-		ioehttp.ReadText(job.Client),
 	)
 }
 
