@@ -173,8 +173,9 @@ func TestSaveResult(t *testing.T) {
 		Config: ScanRequest{OutputDir: tmpDir},
 	}
 
+	expectedPath := filepath.Join(tmpDir, fmt.Sprintf("%s_%s.json", "tr|Q95Q25", "job-123"))
 	result := saveResult(
-		T.MakeTuple2(`{"results": [{"accession": "IPR000001"}]}`, job),
+		T.MakeTuple3(`{"results": [{"accession": "IPR000001"}]}`, job, expectedPath),
 	)()
 	require.True(t, isRightScan(result))
 
@@ -317,16 +318,22 @@ func TestDownloadJSONResult(t *testing.T) {
 	}))
 	defer server.Close()
 
+	config := scanConfig(server.URL)
+	config.OutputDir = t.TempDir()
+
 	job := CompletedJob{
 		JobID:  "JOB-123",
 		SeqID:  "test_seq",
 		Client: ioehttp.MakeClient(server.Client()),
-		Config: scanConfig(server.URL),
+		Config: config,
 	}
 
-	result := downloadJSONResult(job)()
+	result := downloadAndSave(job)()
 	require.True(t, isRightScan(result))
-	assert.JSONEq(t, jsonResponse, unwrapRightScan(result))
+
+	content, err := os.ReadFile(unwrapRightScan(result))
+	require.NoError(t, err)
+	assert.JSONEq(t, jsonResponse, string(content))
 }
 
 func TestPollJobFinished(t *testing.T) {
