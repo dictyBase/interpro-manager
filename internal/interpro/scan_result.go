@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"path/filepath"
+
+	"github.com/IBM/fp-go/v2/file"
 
 	F "github.com/IBM/fp-go/v2/function"
 	B "github.com/IBM/fp-go/v2/http/builder"
@@ -21,8 +22,16 @@ import (
 func downloadAndSave(job CompletedJob) IOE.IOEither[error, string] {
 	return F.Pipe2(
 		downloadJSONResult(job),
-		IOE.Map[error](func(rawJSON string) T.Tuple2[string, CompletedJob] {
-			return T.MakeTuple2(rawJSON, job)
+		IOE.Map[error](func(rawJSON string) T.Tuple3[string, CompletedJob, string] {
+			output := F.Pipe1(
+				job.Config.OutputDir,
+				file.Join(fmt.Sprintf(
+					"%s_%s.json",
+					job.SeqID,
+					job.JobID,
+				)),
+			)
+			return T.MakeTuple3(rawJSON, job, output)
 		}),
 		IOE.Chain(saveResult),
 	)
@@ -48,18 +57,13 @@ func resultURL(job CompletedJob) string {
 	})
 }
 
-// saveResult: T.Tuple2[string, CompletedJob] → IOEither[error, string]
-func saveResult(input T.Tuple2[string, CompletedJob]) IOE.IOEither[error, string] {
-	rawJSON, job := input.F1, input.F2
-	outputPath := filepath.Join(
-		job.Config.OutputDir,
-		fmt.Sprintf("%s_%s.json", job.SeqID, job.JobID),
-	)
-	return F.Pipe1(
-		F.Pipe1(
-			IOEF.Create(outputPath),
-			IOEF.WriteAll[*os.File]([]byte(rawJSON)),
-		),
-		IOE.Map[error](func(_ []byte) string { return outputPath }),
+func saveResult(input T.Tuple3[string, CompletedJob, string]) IOE.IOEither[error, string] {
+	return F.Pipe3(
+		input.F3,
+		IOEF.Create,
+		IOEF.WriteAll[*os.File]([]byte(input.F1)),
+		IOE.Map[error](func(_ []byte) string {
+			return input.F3
+		}),
 	)
 }
