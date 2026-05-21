@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/mail"
 	"os"
 
 	E "github.com/IBM/fp-go/v2/either"
@@ -12,6 +13,7 @@ import (
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	IOEF "github.com/IBM/fp-go/v2/ioeither/file"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
+	O "github.com/IBM/fp-go/v2/option"
 	Pred "github.com/IBM/fp-go/v2/predicate"
 	S "github.com/IBM/fp-go/v2/string"
 	T "github.com/IBM/fp-go/v2/tuple"
@@ -84,13 +86,14 @@ func reportScanResults(paths []string) error {
 }
 
 func validateScanRequest(scanReq ScanRequest) E.Either[error, ScanRequest] {
-	return F.Pipe3(
+	return F.Pipe4(
 		E.Of[error](scanReq),
 		E.Chain(
 			E.FromPredicate(
 				hasEmail,
 				ER.OnSome[ScanRequest]("email is required"),
 			)),
+		E.Chain(validateEmailFormat),
 		E.Chain(E.FromPredicate(
 			hasFastaPath,
 			ER.OnSome[ScanRequest]("fasta path is required"),
@@ -109,6 +112,21 @@ func validateScanRequest(scanReq ScanRequest) E.Either[error, ScanRequest] {
 					)
 				}),
 			)
+		}),
+	)
+}
+
+func validateEmailFormat(s ScanRequest) E.Either[error, ScanRequest] {
+	addr, err := mail.ParseAddress(s.Email)
+	return F.Pipe3(
+		O.FromNillable(addr),
+		O.Map(func(a *mail.Address) string { return a.Address }),
+		E.FromOption[string](func() error {
+			return fmt.Errorf("invalid email: %s: %w", s.Email, err)
+		}),
+		E.Map[error](func(normalized string) ScanRequest {
+			s.Email = normalized
+			return s
 		}),
 	)
 }

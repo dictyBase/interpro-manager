@@ -92,6 +92,15 @@ func TestValidateScanRequest(t *testing.T) {
 		assert.Contains(t, unwrapLeftScan(result).Error(), "email is required")
 	})
 
+	t.Run("invalid email format", func(t *testing.T) {
+		result := validateScanRequest(ScanRequest{
+			Email:     "not-an-email",
+			FastaPath: "x.fa",
+		})
+		require.True(t, E.IsLeft(result))
+		assert.Contains(t, unwrapLeftScan(result).Error(), "invalid email")
+	})
+
 	t.Run("missing fasta path", func(t *testing.T) {
 		result := validateScanRequest(ScanRequest{Email: "a@b.com"})
 		require.True(t, E.IsLeft(result))

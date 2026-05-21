@@ -1,12 +1,12 @@
 package interpro
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -259,7 +259,10 @@ func TestRunLoop(t *testing.T) {
 
 		resp := fmt.Sprintf(
 			`{"count":2,"next":%s,"previous":null,"results":[{"metadata":{"accession":"A%d","name":"Protein %d","source_database":"unreviewed","length":100,"source_organism":{"taxId":"1","scientificName":"Org","fullName":"Org"},"gene":"gene%d","in_alphafold":false,"in_bfvd":false},"taxa":[]}]}`,
-			next, callCount, callCount, callCount,
+			next,
+			callCount,
+			callCount,
+			callCount,
 		)
 		fmt.Fprint(w, resp)
 	}))
