@@ -35,13 +35,13 @@ type (
 
 // buildStatusHandler returns a status-dispatch function built with F.Switch.
 func buildStatusHandler(job SubmittedJob) statusHandler {
-	return F.Switch[string, string, pollTickIO](
+	return F.Switch(
 		F.Identity[string],
 		map[string]statusHandler{
-			"FINISHED": F.Constant1[string, pollTickIO](IOE.Of[error](O.Some(CompletedJob(job)))),
-			"RUNNING":  F.Constant1[string, pollTickIO](IOE.Of[error](O.None[CompletedJob]())),
-			"QUEUED":   F.Constant1[string, pollTickIO](IOE.Of[error](O.None[CompletedJob]())),
-			"PENDING":  F.Constant1[string, pollTickIO](IOE.Of[error](O.None[CompletedJob]())),
+			"FINISHED": F.Constant1[string](IOE.Of[error](O.Some(CompletedJob(job)))),
+			"RUNNING":  F.Constant1[string](IOE.Of[error](O.None[CompletedJob]())),
+			"QUEUED":   F.Constant1[string](IOE.Of[error](O.None[CompletedJob]())),
+			"PENDING":  F.Constant1[string](IOE.Of[error](O.None[CompletedJob]())),
 		},
 		func(status string) pollTickIO {
 			return IOE.Left[pollTick](fmt.Errorf(
@@ -55,32 +55,41 @@ func buildStatusHandler(job SubmittedJob) statusHandler {
 // tickOnce performs a single poll tick: fetch status, log it via IO.Logf, dispatch via switch.
 func tickOnce(input tickInput) pollTickIO {
 	job, dispatch := input.F1, input.F2
-	logFmt := M.ConcatAll(STR.Monoid)([]string{"job ", job.JobID, " (seq ", job.SeqID, "): %s"})
+	logFmt := M.ConcatAll(STR.Monoid)([]string{
+		"job ",
+		job.JobID,
+		" (seq ",
+		job.SeqID,
+		"): %s",
+	})
 	return F.Pipe3(
 		job,
 		getJobStatus,
-		IOE.ChainFirstIOK[error, string](IO.Logf[string](logFmt)),
+		IOE.ChainFirstIOK[error](IO.Logf[string](logFmt)),
 		IOE.Chain(dispatch),
 	)
 }
 
 func tickFailed(err error) tickResult {
-	return T.MakeTuple3[error, bool, CompletedJob](err, false, CompletedJob{})
+	return T.MakeTuple3(err, false, CompletedJob{})
 }
 
 func tickRetry() tickResult {
-	return T.MakeTuple3[error, bool, CompletedJob](nil, false, CompletedJob{})
+	return T.MakeTuple3[error](nil, false, CompletedJob{})
 }
 
 func tickDone(c CompletedJob) tickResult {
-	return T.MakeTuple3[error, bool, CompletedJob](nil, true, c)
+	return T.MakeTuple3[error](nil, true, c)
 }
 
 // pollJob: SubmittedJob → IOEither[error, CompletedJob]
 // Reduced to a pure loop shell — all status-branching logic lives in buildStatusHandler.
 func pollJob(job SubmittedJob) IOE.IOEither[error, CompletedJob] {
 	return IOE.TryCatchError(func() (CompletedJob, error) {
-		ctx, cancel := context.WithTimeout(context.Background(), job.Config.Timeout)
+		ctx, cancel := context.WithTimeout(
+			context.Background(),
+			job.Config.Timeout,
+		)
 		defer cancel()
 
 		dispatch := buildStatusHandler(job)
@@ -90,9 +99,9 @@ func pollJob(job SubmittedJob) IOE.IOEither[error, CompletedJob] {
 				T.MakeTuple2(job, dispatch),
 				tickOnce,
 				toEither[error, pollTick],
-				E.Fold[error, pollTick, tickResult](
+				E.Fold(
 					tickFailed,
-					O.Fold[CompletedJob, tickResult](tickRetry, tickDone),
+					O.Fold(tickRetry, tickDone),
 				),
 			)
 
