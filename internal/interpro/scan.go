@@ -23,17 +23,32 @@ const (
 	outputDirPerm = 0o755
 )
 
+var (
+	hasEmail = F.Pipe1(
+		S.IsNonEmpty,
+		Pred.ContraMap(func(s ScanRequest) string {
+			return s.Email
+		}),
+	)
+	hasFastaPath = F.Pipe1(
+		S.IsNonEmpty,
+		Pred.ContraMap(func(s ScanRequest) string {
+			return s.FastaPath
+		}),
+	)
+)
+
 func Scan(_ context.Context, cmd *cli.Command) error {
 	return F.Pipe8(
 		cmd,
 		extractScanRequest,
 		validateScanRequest,
 		IOE.FromEither,
-		IOE.Map[error](func(r ScanRequest) SubmitArgs {
+		IOE.Map[error](func(scanr ScanRequest) SubmitArgs {
 			return T.MakeTuple2(
 				ioehttp.MakeClient(
-					&http.Client{Timeout: r.Timeout}),
-				r,
+					&http.Client{Timeout: scanr.Timeout}),
+				scanr,
 			)
 		}),
 		IOE.ChainFirst(func(args SubmitArgs) IOE.IOEither[error, string] {
@@ -67,17 +82,6 @@ func reportScanResults(paths []string) error {
 	}
 	return nil
 }
-
-var (
-	hasEmail = F.Pipe1(
-		S.IsNonEmpty,
-		Pred.ContraMap(func(s ScanRequest) string { return s.Email }),
-	)
-	hasFastaPath = F.Pipe1(
-		S.IsNonEmpty,
-		Pred.ContraMap(func(s ScanRequest) string { return s.FastaPath }),
-	)
-)
 
 func validateScanRequest(scanReq ScanRequest) E.Either[error, ScanRequest] {
 	return F.Pipe3(

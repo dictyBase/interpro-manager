@@ -1,6 +1,7 @@
 package interpro
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -448,6 +449,80 @@ func TestProcessOneFastaIntegration(t *testing.T) {
 	content, err := os.ReadFile(outputPath)
 	require.NoError(t, err)
 	assert.NotEmpty(t, content)
+}
+
+func TestWrapScanError(t *testing.T) {
+	err := wrapScanError(fmt.Errorf("network error"))
+	assert.EqualError(t, err, "scan failed: network error")
+}
+
+func TestReportScanResults(t *testing.T) {
+	var buf bytes.Buffer
+
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := reportScanResults([]string{"/tmp/a.json", "/tmp/b.json"})
+
+	w.Close()
+	os.Stdout = oldStdout
+	_, _ = io.Copy(&buf, r)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "wrote /tmp/a.json\nwrote /tmp/b.json\n", buf.String())
+}
+
+func TestStreamFastaRecordsErrorOnFirstRecord(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	dir, err := os.Getwd()
+	require.NoError(t, err)
+
+	config := scanConfig(server.URL)
+	config.PollInterval = 10 * time.Millisecond
+	config.OutputDir = t.TempDir()
+	config.FastaPath = filepath.Join(dir, "..", "seqio", "testdata", "multi.fa")
+
+	args := T.MakeTuple2[ioehttp.Client, ScanRequest](
+		ioehttp.MakeClient(server.Client()),
+		config,
+	)
+
+	_ = ensureOutputDir(config.OutputDir)()
+
+	result := streamFastaRecords(args)()
+	require.True(t, E.IsLeft(result))
+	assert.Contains(t, unwrapLeftScan(result).Error(), "500")
+}
+
+func TestScanValidationError(t *testing.T) {
+	run := false
+	cmd := &cli.Command{
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "fasta"},
+			&cli.StringFlag{Name: "email"},
+			&cli.StringFlag{Name: "output", Value: "."},
+			&cli.StringFlag{Name: "seq-type", Value: "p"},
+			&cli.DurationFlag{Name: "poll-interval", Value: 15 * time.Second},
+			&cli.DurationFlag{Name: "timeout", Value: 30 * time.Minute},
+		},
+		Action: func(_ context.Context, c *cli.Command) error {
+			run = true
+			err := Scan(context.Background(), c)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "email is required")
+			return nil
+		},
+	}
+	err := cmd.Run(context.Background(), []string{
+		"app", "scan", "--fasta", "/nonexistent.fa",
+	})
+	require.NoError(t, err)
+	assert.True(t, run)
 }
 
 func TestStreamFastaRecordsEndToEnd(t *testing.T) {
