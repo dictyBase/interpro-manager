@@ -15,6 +15,7 @@ import (
 
 	E "github.com/IBM/fp-go/v2/either"
 	F "github.com/IBM/fp-go/v2/function"
+	H "github.com/IBM/fp-go/v2/http"
 	IOE "github.com/IBM/fp-go/v2/ioeither"
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	T "github.com/IBM/fp-go/v2/tuple"
@@ -247,6 +248,48 @@ func TestBuildSubmitRequesterBody(t *testing.T) {
 	assert.Contains(t, bodyStr, fmt.Sprintf("email=%s", "test%40ebi.ac.uk"))
 	assert.Contains(t, bodyStr, "stype=p")
 	assert.Contains(t, bodyStr, "sequence=%3Etest_seq%0AMKFLVLALL")
+}
+
+func TestBuildSubmitRequesterStripsAsterisks(t *testing.T) {
+	var capturedBody []byte
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		capturedBody = body
+		w.Header().Set("Content-Type", "text/plain")
+		_, _ = io.WriteString(w, "JOB-ASTERISK-TEST")
+	}))
+	defer server.Close()
+
+	config := ScanRequest{
+		Email:   "test@ebi.ac.uk",
+		SeqType: "p",
+		BaseURL: server.URL,
+	}
+
+	rec := seqio.Fasta{
+		ID:       []byte("test_seq"),
+		Sequence: []byte("MKF*LAL*"),
+	}
+
+	args := T.MakeTuple2[ioehttp.Client, ScanRequest](
+		ioehttp.MakeClient(server.Client()),
+		config,
+	)
+
+	result := buildSubmitRequester(T.MakeTuple3(args.F1, args.F2, rec))()
+	require.True(t, isRightScan(result))
+
+	bodyStr := string(capturedBody)
+	assert.Contains(t, bodyStr, "sequence=%3Etest_seq%0AMKFLAL")
+	assert.NotContains(t, bodyStr, "*")
+	assert.NotContains(t, bodyStr, "%2A")
+}
+
+func TestWrapScanErrorHttpBody(t *testing.T) {
+	httpErr := &H.HttpError{}
+	err := wrapScanError(httpErr)
+	assert.Contains(t, err.Error(), "server response:")
 }
 
 func TestEnsureOutputDir(t *testing.T) {
