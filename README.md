@@ -21,13 +21,13 @@ CLI tool for interacting with EMBL-EBI's InterPro protein database — download 
 ## Install
 
 ```bash
-go install github.com/dictybase-docker/interpro-manager/cmd/interpro-cli@latest
+go install github.com/dictybase/interpro-manager/cmd/interpro-cli@latest
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/dictybase-docker/interpro-manager.git
+git clone https://github.com/dictybase/interpro-manager.git
 cd interpro-manager
 go build -o interpro-manager ./cmd/interpro-cli
 ```

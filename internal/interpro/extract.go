@@ -8,7 +8,7 @@ import (
 	O "github.com/IBM/fp-go/v2/option"
 	S "github.com/IBM/fp-go/v2/string"
 
-	"github.com/dictybase-docker/interpro-manager/internal/seqio"
+	"github.com/dictybase/interpro-manager/internal/seqio"
 )
 
 var hasGene = func(r Result) bool {

@@ -7,7 +7,7 @@ import (
 	ioehttp "github.com/IBM/fp-go/v2/ioeither/http"
 	T "github.com/IBM/fp-go/v2/tuple"
 
-	"github.com/dictybase-docker/interpro-manager/internal/seqio"
+	"github.com/dictybase/interpro-manager/internal/seqio"
 )
 
 func streamFastaRecords(args SubmitArgs) IOE.IOEither[error, []string] {

@@ -12,7 +12,7 @@ import (
 	ioehb "github.com/IBM/fp-go/v2/ioeither/http/builder"
 	M "github.com/IBM/fp-go/v2/monoid"
 	STR "github.com/IBM/fp-go/v2/string"
-	"github.com/dictybase-docker/interpro-manager/internal/seqio"
+	"github.com/dictybase/interpro-manager/internal/seqio"
 )
 
 func fastaEntry(rec seqio.Fasta) string {

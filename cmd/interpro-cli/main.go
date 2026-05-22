@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/dictybase-docker/interpro-manager/internal/interpro"
+	"github.com/dictybase/interpro-manager/internal/interpro"
 	"github.com/urfave/cli/v3"
 )
 

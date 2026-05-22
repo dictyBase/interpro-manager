@@ -1,0 +1,12 @@
+name: Lint Golang code
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  call-lint:
+    uses: dictyBase/workflows/.github/workflows/golang-lint.yaml@develop
+    with:
+      repository: ${{ github.repository }}
+      ref: ${{ github.event.pull_request.head.sha }}
+      version: v2.8.0-alpine

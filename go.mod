@@ -1,4 +1,4 @@
-module github.com/dictybase-docker/interpro-manager
+module github.com/dictybase/interpro-manager
 
 go 1.25.5
 

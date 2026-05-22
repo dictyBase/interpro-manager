@@ -1,0 +1,14 @@
+name: Create Pull Request
+on: create
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
+        run: |
+          branch_name=$(git symbolic-ref --short HEAD)
+          gh pr create --base master --title "Auto-generated Pull Request for $branch_name" --body "Pulling '$branch_name' into master. Please review and merge."
