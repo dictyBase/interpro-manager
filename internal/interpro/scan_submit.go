@@ -12,7 +12,16 @@ import (
 	ioehb "github.com/IBM/fp-go/v2/ioeither/http/builder"
 	M "github.com/IBM/fp-go/v2/monoid"
 	STR "github.com/IBM/fp-go/v2/string"
+	"github.com/dictybase-docker/interpro-manager/internal/seqio"
 )
+
+func fastaEntry(rec seqio.Fasta) string {
+	return fmt.Sprintf(
+		">%s\n%s",
+		string(rec.ID),
+		strings.ReplaceAll(string(rec.Sequence), "*", ""),
+	)
+}
 
 func buildSubmitRequester(
 	input SubmitInput,
@@ -26,17 +35,7 @@ func buildSubmitRequester(
 		"stype":    {scanConfig.SeqType},
 		"goterms":  {"true"},
 		"pathways": {"true"},
-		"sequence": {
-			fmt.Sprintf(
-				">%s\n%s",
-				string(rec.ID),
-				strings.ReplaceAll(
-					string(rec.Sequence),
-					"*",
-					"",
-				),
-			),
-		},
+		"sequence": {fastaEntry(rec)},
 	}.Encode()
 
 	return F.Pipe2(
