@@ -19,6 +19,8 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /bin/interpro-ma
 # Runtime Stage
 FROM gcr.io/distroless/static-debian12
 
+LABEL org.opencontainers.image.source="https://github.com/dictybase/interpro-manager"
+
 COPY --from=builder /bin/interpro-manager /bin/interpro-manager
 
 ENTRYPOINT ["/bin/interpro-manager"]
