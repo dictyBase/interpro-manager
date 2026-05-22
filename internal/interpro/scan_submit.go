@@ -26,14 +26,28 @@ func buildSubmitRequester(
 		"stype":    {scanConfig.SeqType},
 		"goterms":  {"true"},
 		"pathways": {"true"},
-		"sequence": {fmt.Sprintf(">%s\n%s", string(rec.ID), string(rec.Sequence))},
+		"sequence": {
+			fmt.Sprintf(
+				">%s\n%s",
+				string(rec.ID),
+				strings.ReplaceAll(
+					string(rec.Sequence),
+					"*",
+					"",
+				),
+			),
+		},
 	}.Encode()
 
 	return F.Pipe2(
 		F.Pipe6(
 			B.Default,
 			F.Pipe1(
-				M.ConcatAll(STR.Monoid)([]string{scanConfig.BaseURL, "/", "run"}),
+				M.ConcatAll(STR.Monoid)([]string{
+					scanConfig.BaseURL,
+					"/",
+					"run",
+				}),
 				B.WithURL,
 			),
 			B.WithMethod("POST"),
