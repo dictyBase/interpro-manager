@@ -1,5 +1,11 @@
 # interpro-manager
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/dictybase/interpro-manager.svg)](https://pkg.go.dev/github.com/dictybase/interpro-manager)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dictybase/interpro-manager)](https://goreportcard.com/report/github.com/dictybase/interpro-manager)
+[![CI/CD](https://github.com/dictybase/interpro-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/dictybase/interpro-manager/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/License-BSD%202--Clause-blue.svg)](LICENSE)
+[![Funding](https://badgen.net/badge/NIGMS/Rex%20L%20Chisholm,K%20M%20Scaglione,Siddhartha%20Basu,dictyBase,DCR/yellow?list=|)](https://reporter.nih.gov/search/Z4n-a8mfeE6moXhk-OR3hw/project-details/11116605)
+
 CLI tool for interacting with EMBL-EBI's InterPro protein database — download protein records by taxonomy and submit sequences to InterProScan6 for analysis.
 
 ## Contents
