@@ -289,7 +289,7 @@ func TestBuildSubmitRequesterStripsAsterisks(t *testing.T) {
 func TestWrapScanErrorHttpBody(t *testing.T) {
 	httpErr := &H.HttpError{}
 	err := wrapScanError(httpErr)
-	assert.Contains(t, err.Error(), "server response:")
+	assert.Contains(t, err.Error(), "invalid status code")
 }
 
 func TestEnsureOutputDir(t *testing.T) {

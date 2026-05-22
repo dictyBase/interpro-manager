@@ -246,7 +246,7 @@ func TestWritePage(t *testing.T) {
 func TestRunLoop(t *testing.T) {
 	callCount := 0
 	var server *httptest.Server
-	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		callCount++
 
@@ -258,7 +258,10 @@ func TestRunLoop(t *testing.T) {
 		}
 
 		resp := fmt.Sprintf(
-			`{"count":2,"next":%s,"previous":null,"results":[{"metadata":{"accession":"A%d","name":"Protein %d","source_database":"unreviewed","length":100,"source_organism":{"taxId":"1","scientificName":"Org","fullName":"Org"},"gene":"gene%d","in_alphafold":false,"in_bfvd":false},"taxa":[]}]}`,
+			`{"count":2,"next":%s,"previous":null,"results":[{"metadata":{"accession":"A%d",`+
+				`"name":"Protein %d","source_database":"unreviewed","length":100,`+
+				`"source_organism":{"taxId":"1","scientificName":"Org","fullName":"Org"},`+
+				`"gene":"gene%d","in_alphafold":false,"in_bfvd":false},"taxa":[]}]}`,
 			next,
 			callCount,
 			callCount,
@@ -370,10 +373,9 @@ func TestDownloadAndWrite(t *testing.T) {
 			&cli.IntFlag{Name: "page-size", Value: 200},
 			&cli.StringFlag{Name: "output"},
 		},
-		Action: func(_ context.Context, c *cli.Command) error {
+		Action: func(_ context.Context, _ *cli.Command) error {
 			run = true
-			cfg := initialDownloadConfig(c)
-			cfg = T.MakeTuple3(ioehttp.MakeClient(server.Client()), server.URL, outputPath)
+			cfg := T.MakeTuple3(ioehttp.MakeClient(server.Client()), server.URL, outputPath)
 
 			err := F.Pipe4(
 				cfg,
