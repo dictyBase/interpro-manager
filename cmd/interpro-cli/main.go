@@ -16,137 +16,124 @@ const (
 	defaultPageSize     = 20
 	defaultPollInterval = 15 * time.Second
 	defaultTimeout      = 30 * time.Minute
-	defaultConcurrency  = 25
 )
-
-func downloadCommand() *cli.Command {
-	return &cli.Command{
-		Name:  "download",
-		Usage: "Fetch InterPro protein records for a taxonomy ID and save to TSV",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "taxon-id",
-				Aliases: []string{"t"},
-				Value:   defaultTaxonID,
-				Usage:   "NCBI Taxonomy ID",
-			},
-			&cli.StringFlag{
-				Name:    "output",
-				Aliases: []string{"o"},
-				Value:   defaultOutput,
-				Usage:   "Output TSV file path",
-			},
-			&cli.IntFlag{
-				Name:    "page-size",
-				Aliases: []string{"p"},
-				Value:   defaultPageSize,
-				Usage:   "API page size",
-			},
-		},
-		Action: interpro.DownloadAndWrite,
-	}
-}
-
-func scanCommand() *cli.Command {
-	return &cli.Command{
-		Name:  "scan",
-		Usage: "Submit protein sequences to InterProScan and save JSON results",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "fasta",
-				Aliases: []string{"f"},
-				Usage:   "Path to FASTA file (supports multi-FASTA)",
-			},
-			&cli.StringFlag{
-				Name:    "email",
-				Aliases: []string{"e"},
-				Sources: cli.EnvVars("EBI_EMAIL"),
-				Usage:   "Email for EMBL-EBI Job Dispatcher (required)",
-			},
-			&cli.StringFlag{
-				Name:    "output",
-				Aliases: []string{"o"},
-				Value:   ".",
-				Usage:   "Output directory for JSON results",
-			},
-			&cli.StringFlag{
-				Name:    "seq-type",
-				Aliases: []string{"s"},
-				Value:   "p",
-				Usage:   "Sequence type: p (protein) or n (nucleotide)",
-			},
-			&cli.DurationFlag{
-				Name:  "poll-interval",
-				Value: defaultPollInterval,
-				Usage: "How often to check job status",
-			},
-			&cli.DurationFlag{
-				Name:  "timeout",
-				Value: defaultTimeout,
-				Usage: "Maximum time to wait for a single job",
-			},
-		},
-		Action: interpro.Scan,
-	}
-}
-
-func concurrentScanCommand() *cli.Command {
-	return &cli.Command{
-		Name:  "concurrent-scan",
-		Usage: "Submit protein sequences to InterProScan concurrently and save JSON results",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "fasta",
-				Aliases: []string{"f"},
-				Usage:   "Path to FASTA file (supports multi-FASTA)",
-			},
-			&cli.StringFlag{
-				Name:    "email",
-				Aliases: []string{"e"},
-				Sources: cli.EnvVars("EBI_EMAIL"),
-				Usage:   "Email for EMBL-EBI Job Dispatcher (required)",
-			},
-			&cli.StringFlag{
-				Name:    "output",
-				Aliases: []string{"o"},
-				Value:   ".",
-				Usage:   "Output directory for JSON results",
-			},
-			&cli.StringFlag{
-				Name:    "seq-type",
-				Aliases: []string{"s"},
-				Value:   "p",
-				Usage:   "Sequence type: p (protein) or n (nucleotide)",
-			},
-			&cli.DurationFlag{
-				Name:  "poll-interval",
-				Value: defaultPollInterval,
-				Usage: "How often to check job status",
-			},
-			&cli.DurationFlag{
-				Name:  "timeout",
-				Value: defaultTimeout,
-				Usage: "Maximum time to wait for a single job",
-			},
-			&cli.IntFlag{
-				Name:    "concurrency",
-				Aliases: []string{"c"},
-				Value:   defaultConcurrency,
-				Usage:   "Maximum number of concurrent InterProScan jobs",
-			},
-		},
-		Action: interpro.ConcurrentScan,
-	}
-}
 
 func main() {
 	cmd := &cli.Command{
 		Name:  "interpro-manager",
 		Usage: "CLI for interacting with the InterPro protein database",
 		Commands: []*cli.Command{
-			downloadCommand(),
-			scanCommand(),
-			concurrentScanCommand(),
+			{
+				Name:  "download",
+				Usage: "Fetch InterPro protein records for a taxonomy ID and save to TSV",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "taxon-id",
+						Aliases: []string{"t"},
+						Value:   defaultTaxonID,
+						Usage:   "NCBI Taxonomy ID",
+					},
+					&cli.StringFlag{
+						Name:    "output",
+						Aliases: []string{"o"},
+						Value:   defaultOutput,
+						Usage:   "Output TSV file path",
+					},
+					&cli.IntFlag{
+						Name:    "page-size",
+						Aliases: []string{"p"},
+						Value:   defaultPageSize,
+						Usage:   "API page size",
+					},
+				},
+				Action: interpro.DownloadAndWrite,
+			},
+			{
+				Name:  "scan",
+				Usage: "Submit protein sequences to InterProScan and save JSON results",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "fasta",
+						Aliases: []string{"f"},
+						Usage:   "Path to FASTA file (supports multi-FASTA)",
+					},
+					&cli.StringFlag{
+						Name:    "email",
+						Aliases: []string{"e"},
+						Sources: cli.EnvVars("EBI_EMAIL"),
+						Usage:   "Email for EMBL-EBI Job Dispatcher (required)",
+					},
+					&cli.StringFlag{
+						Name:    "output",
+						Aliases: []string{"o"},
+						Value:   ".",
+						Usage:   "Output directory for JSON results",
+					},
+					&cli.StringFlag{
+						Name:    "seq-type",
+						Aliases: []string{"s"},
+						Value:   "p",
+						Usage:   "Sequence type: p (protein) or n (nucleotide)",
+					},
+					&cli.DurationFlag{
+						Name:  "poll-interval",
+						Value: defaultPollInterval,
+						Usage: "How often to check job status",
+					},
+					&cli.DurationFlag{
+						Name:  "timeout",
+						Value: defaultTimeout,
+						Usage: "Maximum time to wait for a single job",
+					},
+				},
+				Action: interpro.Scan,
+			},
+			{
+				Name:  "concurrent-scan",
+				Usage: "Submit protein sequences to InterProScan concurrently and save JSON results",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "fasta",
+						Aliases: []string{"f"},
+						Usage:   "Path to FASTA file (supports multi-FASTA)",
+					},
+					&cli.StringFlag{
+						Name:    "email",
+						Aliases: []string{"e"},
+						Sources: cli.EnvVars("EBI_EMAIL"),
+						Usage:   "Email for EMBL-EBI Job Dispatcher (required)",
+					},
+					&cli.StringFlag{
+						Name:    "output",
+						Aliases: []string{"o"},
+						Value:   ".",
+						Usage:   "Output directory for JSON results",
+					},
+					&cli.StringFlag{
+						Name:    "seq-type",
+						Aliases: []string{"s"},
+						Value:   "p",
+						Usage:   "Sequence type: p (protein) or n (nucleotide)",
+					},
+					&cli.DurationFlag{
+						Name:  "poll-interval",
+						Value: defaultPollInterval,
+						Usage: "How often to check job status",
+					},
+					&cli.DurationFlag{
+						Name:  "timeout",
+						Value: defaultTimeout,
+						Usage: "Maximum time to wait for a single job",
+					},
+					&cli.IntFlag{
+						Name:    "concurrency",
+						Aliases: []string{"c"},
+						Value:   25,
+						Usage:   "Maximum number of concurrent InterProScan jobs",
+					},
+				},
+				Action: interpro.ConcurrentScan,
+			},
 		},
 	}
 
