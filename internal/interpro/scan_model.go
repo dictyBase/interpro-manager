@@ -18,6 +18,7 @@ type ScanRequest struct {
 	BaseURL      string
 	PollInterval time.Duration
 	Timeout      time.Duration
+	Concurrency  int
 }
 
 // SubmittedJob holds state after a successful API submission.
