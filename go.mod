@@ -3,7 +3,7 @@ module github.com/dictybase/interpro-manager
 go 1.25.5
 
 require (
-	github.com/IBM/fp-go/v2 v2.3.16
+	github.com/IBM/fp-go/v2 v2.3.20
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.9.0
 	golang.org/x/sync v0.20.0
