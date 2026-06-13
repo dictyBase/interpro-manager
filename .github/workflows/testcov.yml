@@ -13,7 +13,7 @@ jobs:
       - name: run tests
         run: go test -parallel 4 -covermode=atomic -coverprofile=profile.cov -v ./...
       - name: upload coverage to codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./profile.cov
           token: ${{ secrets.CODECOV }}
