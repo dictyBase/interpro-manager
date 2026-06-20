@@ -6,7 +6,7 @@ require (
 	github.com/IBM/fp-go/v2 v2.3.55
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.10.0
-	golang.org/x/sync v0.20.0
+	golang.org/x/sync v0.21.0
 )
 
 require (
