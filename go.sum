@@ -1,5 +1,5 @@
-github.com/IBM/fp-go/v2 v2.3.96 h1:aAvhMpoBm36MLOJHd1mJmoxKC1BfIqSpaU41f5M8UDY=
-github.com/IBM/fp-go/v2 v2.3.96/go.mod h1:0Q2D4IhQJgOUj4xkDN7D0gDwt3p+e1e0v0zXYuyMvfM=
+github.com/IBM/fp-go/v2 v2.3.99 h1:bQI4ogRGCAXYWesJGgRXFAC5mtgkhQvQojbOIXHE5Xo=
+github.com/IBM/fp-go/v2 v2.3.99/go.mod h1:0Q2D4IhQJgOUj4xkDN7D0gDwt3p+e1e0v0zXYuyMvfM=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
