@@ -1,5 +1,5 @@
-github.com/IBM/fp-go/v2 v2.3.96 h1:aAvhMpoBm36MLOJHd1mJmoxKC1BfIqSpaU41f5M8UDY=
-github.com/IBM/fp-go/v2 v2.3.96/go.mod h1:0Q2D4IhQJgOUj4xkDN7D0gDwt3p+e1e0v0zXYuyMvfM=
+github.com/IBM/fp-go/v2 v2.3.111 h1:JoE0mieoTMQifCoT8S9N4PBvjcnAWA1fu+h061dGtxc=
+github.com/IBM/fp-go/v2 v2.3.111/go.mod h1:46uEuyJFAq1wrOz4gec/8LGVFdsvxjCeDdAXJF0jpFg=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 github.com/urfave/cli/v3 v3.11.0 h1:P/euJp99kb9p0tlVY+iYTLYYTAQlfl0hR2gUO1Img1Q=
